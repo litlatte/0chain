@@ -10,11 +10,10 @@ metadata:
     {{- include "0helm-0chain.labels" $ | nindent 4 }}-sharder-data-pvc-0{{ $i }}
 spec:
   storageClassName: {{ $.Values.sharder.persistence.storageClass_data_pvc }}{{ $i }}
-  capacity:
-    storage: {{ $.Values.sharder.persistence.size_data_pvc }}
+  resources:
+    requests:
+      storage: {{ $.Values.sharder.persistence.size_data_pvc }}
   accessModes:
     - {{ $.Values.sharder.persistence.accessMode_data_pvc }}
-  hostPath:
-    path: "/mnt/kubernetes/sharder-data-0{{ $i }}"
 
 {{- end }}

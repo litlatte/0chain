@@ -5,9 +5,9 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: miner-data-pvc-{{ $i }}
+  name: miner-data-pvc-0{{ $i }}
   labels:
-    {{- include "0helm-0chain.labels" $ | nindent 4 }}-miner-data-pvc-{{ $i }}
+    {{- include "0helm-0chain.labels" $ | nindent 4 }}-miner-data-pvc-0{{ $i }}
 spec:
   accessModes:
   - {{ $.Values.miner.persistence.accessMode_data_pvc }}

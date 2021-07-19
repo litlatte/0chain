@@ -18,7 +18,7 @@ spec:
   template:
     metadata:
       labels:
-        {{- include "0helm-0chain.labels" $ | nindent 6 }}-cassandra-0{{ $i }}
+        {{- include "0helm-0chain.labels" $ | nindent 8 }}-cassandra-0{{ $i }}
     spec:
       containers:
         - image: {{ $.Values.sharder.cassandraImage.repository }}:{{ $.Values.sharder.cassandraImage.tag }}

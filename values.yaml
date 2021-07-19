@@ -14,11 +14,11 @@ sharder:
   host: grpc.0chain.net
 
   minioConfig:
-    bucketUrl: 
-    accessKeyId:
-    secretAccessKey:
-    bucketName:
-    bucketRegion:
+    bucketUrl: s3.amazonaws.com
+    accessKeyId: AKIA4MPQDEZ4OTH5EJPJ
+    secretAccessKey: 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
+    bucketName: 0helm-test
+    bucketRegion: us-east-2
 
   sharderImage:
     repository: 0chaindev/sharder

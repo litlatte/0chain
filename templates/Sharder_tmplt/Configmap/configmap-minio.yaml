@@ -2,13 +2,13 @@ apiVersion: v1
 kind: Secret
 metadata:
   labels:
-    {{- include "0helm-0chain.labels" $ | nindent 6 }}-minio-config
+    {{- include "0helm-0chain.labels" $ | nindent 4 }}-minio-config
   creationTimestamp: null
   name: minio-config
 stringData:
   minio_config.txt: |-
-    {{- $.Values.sharder.minioConfig.bucketUrl }}
-    {{- $.Values.sharder.minioConfig.accessKeyId }}
-    {{- $.Values.sharder.minioConfig.secretAccessKey }}
-    {{- $.Values.sharder.minioConfig.bucketName }}
-    {{- $.Values.sharder.minioConfig.bucketRegion }}
+    {{- $.Values.sharder.minioConfig.bucketUrl | nindent 4 }}
+    {{- $.Values.sharder.minioConfig.accessKeyId | nindent 4 }}
+    {{- $.Values.sharder.minioConfig.secretAccessKey | nindent 4 }}
+    {{- $.Values.sharder.minioConfig.bucketName | nindent 4 }}
+    {{- $.Values.sharder.minioConfig.bucketRegion | nindent 4 }}
