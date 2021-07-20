@@ -42,9 +42,9 @@ spec:
             - mkdir -p /0chain/data/rocksdb && mkdir -p /0chain/data/redis/state && mkdir -p /0chain/data/redis/transactions &&  chmod -R 777 /0chain/data/redis && ./bin/miner --deployment_mode 0 --keys_file config/b0mnode0{{ $i }}_keys.txt --dkg_file config/b0mnode0{{ $i }}_dkg.json --delay_file config/n2n_delay.yaml
           env:
             - name: REDIS_HOST
-              value: {{ $.Release.Name }}-redis-0{{ $i }}
+              value: {{ include "0helm-0chain.fullname" $ | nindent 15 }}-redis-0{{ $i }}
             - name: REDIS_TXNS
-              value: {{ $.Release.Name }}-redis-txns-0{{ $i }}
+              value: {{ include "0helm-0chain.fullname" $ | nindent 15 }}-redis-txns-0{{ $i }}
             {{- range $key, $value := $.Values.miner.minerEnv }}
             - name: {{ $key }}
               value: {{ $value | quote }}
@@ -85,16 +85,6 @@ spec:
               name: miner-data-pvc-0{{ $i }}
             - mountPath: /0chain/log
               name: miner-log-pvc-0{{ $i }}
-        - name: {{ $.Release.Name }}-filebeat-sidecar
-          image: {{ $.Values.miner.minerFilebeatImage.repository }}:{{ $.Values.miner.minerFilebeatImage.tag }}
-          resources:
-            {{- toYaml $.Values.miner.minerFilebeatResources | nindent 12 }}
-          volumeMounts:
-          - name: miner-log-pvc-0{{ $i }}
-            mountPath: /0chain/log
-          - name: filebeat-config
-            mountPath: /usr/share/filebeat/filebeat.yml
-            subPath: filebeat.yml
       {{- with $.Values.miner.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
@@ -146,10 +136,6 @@ spec:
         - name: initial-state-pvc
           configMap:
             name: initial-state
-            defaultMode: 0755
-        - name: filebeat-config
-          configMap:
-            name: filebeat-config
             defaultMode: 0755
 
 {{- end }}

@@ -11,6 +11,7 @@ metadata:
 spec:
   ports:
   - name: "{{ $.Values.sharder.sharderService.port }}{{ $i }}"
+    nodePort: {{ $.Values.sharder.sharderService.nodePort }}{{ $i }}
     port: {{ $.Values.sharder.sharderService.port }}{{ $i }}
     targetPort: {{ $.Values.sharder.sharderService.port }}{{ $i }}
   type: {{ $.Values.sharder.sharderService.type }}

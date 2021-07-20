@@ -44,7 +44,7 @@ spec:
             - mkdir -p /0chain/data/blocks && mkdir -p /0chain/data/rocksdb && ./bin/sharder --deployment_mode 0 --keys_file config/b0snode0{{ $i }}_keys.txt --minio_file config/minio_config.txt
           env:
             - name: CASSANDRA_CLUSTER
-              value: {{ $.Release.Name }}-cassandra-0{{ $i }}
+              value: {{ include "0helm-0chain.fullname" $ | nindent 15 }}-cassandra-0{{ $i }}
             {{- range $key, $value := $.Values.sharder.sharderEnv }}
             - name: {{ $key }}
               value: {{ $value | quote }}
@@ -83,16 +83,6 @@ spec:
               name: sharder-log-pvc-0{{ $i }}
             - mountPath: /0chain/data
               name: sharder-data-pvc-0{{ $i }}
-        - name: {{ $.Release.Name }}-filebeat-sidecar-0{{ $i }}
-          image: {{ $.Values.sharder.sharderFilebeatImage.repository }}:{{ $.Values.sharder.sharderFilebeatImage.tag }}
-          resources:
-            {{- toYaml $.Values.sharder.sharderFilebeatResources | nindent 12 }} 
-          volumeMounts:
-          - name: sharder-log-pvc-0{{ $i }}
-            mountPath: /0chain/log
-          - name: filebeat-config
-            mountPath: /usr/share/filebeat/filebeat.yml
-            subPath: filebeat.yml
       {{- with $.Values.sharder.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
@@ -165,10 +155,6 @@ spec:
                 path: scylla-init.sh
               - key: wait-for-service.sh
                 path: wait-for-service.sh
-            defaultMode: 0755
-        - name: filebeat-config
-          configMap:
-            name: filebeat-config
             defaultMode: 0755
 
 {{- end }}
