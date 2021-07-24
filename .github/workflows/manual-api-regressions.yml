@@ -22,7 +22,7 @@ jobs:
     steps:   
       - name: Validate network option
         id: network-check
-        run: (echo -n "${{ github.event.inputs.custom_network }}" | xargs | wc -c | grep -v 1 && echo 'NETWORK=custom' >> $GITHUB_ENV) || (echo '${{ env.NETWORKS }}' | grep -w "${{ env.NETWORK }}" > /dev/null || echo "INVALID NETWORK [${{ env.NETWORK }}] SUPPLIED" && exit 1)
+        run: (echo -n "${{ github.event.inputs.custom_network }}" | xargs | wc -c | grep -v 1 && echo 'NETWORK=custom' >> $GITHUB_ENV) || (echo '${{ env.NETWORKS }}' | grep -w "${{ env.NETWORK }}" > /dev/null || (echo "INVALID NETWORK [${{ env.NETWORK }}] SUPPLIED" && exit 1))
    
       - name: checkout
         uses: actions/checkout@v2
