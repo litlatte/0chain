@@ -41,7 +41,7 @@ jobs:
          npm install -g newman-reporter-htmlextra
 
       - name: Make Directory for results
-        run: mkdir -p ./${{ env.NETWORKk }}/latest
+        run: mkdir -p ./${{ env.NETWORK }}/latest
         
       - name: Get Time
         id: time
@@ -62,7 +62,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v2
         with: 
-         name: "TestReport-${{ env.NETWORKk }}-${{ steps.time.outputs.time }}"
+         name: "TestReport-${{ env.NETWORK }}-${{ steps.time.outputs.time }}"
          path: "./${{ env.NETWORK }}/latest"
          
       - name: Deploy report page
@@ -72,7 +72,7 @@ jobs:
           publish_branch: test_reports
           keep_files: true
           github_token: "${{ secrets.SVC_ACCOUNT_SECRET }}"
-          publish_dir: "./${{ env.NETWORKk }}"
+          publish_dir: "./${{ env.NETWORK }}"
           destination_dir: "./${{ env.NETWORK }}"
           user_name: "github-actions[bot]"
           user_email: "github-actions[bot]@users.noreply.github.com"    
