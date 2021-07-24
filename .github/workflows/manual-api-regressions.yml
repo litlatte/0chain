@@ -4,11 +4,11 @@ on:
   workflow_dispatch:
     inputs:
       network:
-        description: 'Which network do you want to run API regressions against? Valid options: beta | dev | grpc | magma | stream | test'
+        description: '[Overridden by custom_network] Which network do you want to run API regressions against? Valid options: beta | dev | grpc | magma | stream | test'
         required: false
         default: 'beta'
       custom_network:
-        description: 'Input custom network you wish to run tests against. eg. beta.0chain.net'
+        description: '[Overrides network] Input custom network you wish to run tests against. eg. beta.0chain.net'
         required: false
         default: ''  
 
@@ -22,7 +22,7 @@ jobs:
     steps:   
       - name: Validate network option
         id: network-check
-        run: (echo -n "${{ github.event.inputs.custom_network }}" | xargs | wc -c | grep -v 0 && echo 'NETWORK=custom' >> $GITHUB_ENV) || (echo '${{ env.NETWORKS }}' | grep -w "${{ env.NETWORK }}" > /dev/null || echo "INVALID NETWORK [${{ env.NETWORK }}] SUPPLIED" && exit 1)
+        run: (echo -n "${{ github.event.inputs.custom_network }}" | xargs | wc -c | grep -v 1 && echo 'NETWORK=custom' >> $GITHUB_ENV) || (echo '${{ env.NETWORKS }}' | grep -w "${{ env.NETWORK }}" > /dev/null || echo "INVALID NETWORK [${{ env.NETWORK }}] SUPPLIED" && exit 1)
    
       - name: checkout
         uses: actions/checkout@v2
