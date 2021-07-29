@@ -330,7 +330,7 @@ func TestGetValueNode(t *testing.T) {
 	t.Parallel()
 
 	ln := NewLeafNode(Path(""), nil, 0, NewValueNode())
-	fn := NewFullNode(NewValueNode())
+	fn := NewFullNode(NewValueNode(), 0)
 
 	type args struct {
 		node Node
@@ -362,7 +362,7 @@ func TestGetValueNode(t *testing.T) {
 		},
 		{
 			name: "Test_GetValueNode_Unknown_Node_OK",
-			args: args{node: NewExtensionNode(nil, nil)},
+			args: args{node: NewExtensionNode(nil, nil, 0)},
 			want: nil,
 		},
 	}

@@ -1012,7 +1012,7 @@ func TestMemoryNodeDB_reachable(t *testing.T) {
 
 	mndb := NewMemoryNodeDB()
 
-	fn := NewFullNode(nil)
+	fn := NewFullNode(nil, 0)
 	bi := fn.indexToByte(0)
 	fn.Children[fn.index(bi)] = []byte("children")
 
@@ -1036,7 +1036,7 @@ func TestMemoryNodeDB_reachable(t *testing.T) {
 				Nodes: mndb.Nodes,
 				mutex: &sync.RWMutex{},
 			},
-			args: args{node: NewExtensionNode([]byte("path"), []byte("key"))},
+			args: args{node: NewExtensionNode([]byte("path"), []byte("key"), 0)},
 			want: false,
 		},
 		{
@@ -1201,7 +1201,7 @@ func TestLevelNodeDB_MultiPutNode(t *testing.T) {
 			fields: fields{current: current, mu: &sync.RWMutex{}},
 			args: args{
 				keys:  []Key{Key("key")},
-				nodes: []Node{NewFullNode(nil)},
+				nodes: []Node{NewFullNode(nil, 0)},
 			},
 			wantErr: true,
 		},
@@ -1281,7 +1281,7 @@ func TestMemoryNodeDB_Validate(t *testing.T) {
 
 	mndb := NewMemoryNodeDB()
 
-	n1 := NewFullNode(&AState{balance: 1})
+	n1 := NewFullNode(&AState{balance: 1}, 0)
 
 	type fields struct {
 		Nodes map[StrKey]Node
@@ -1311,7 +1311,7 @@ func TestMemoryNodeDB_Validate(t *testing.T) {
 				mndb := NewMemoryNodeDB()
 				mpt := NewMerklePatriciaTrie(mndb, 1)
 
-				n := NewFullNode(&AState{balance: 2})
+				n := NewFullNode(&AState{balance: 2}, 0)
 				_, err := mpt.Insert(n.GetHashBytes(), n)
 				require.NoError(t, err)
 
@@ -1320,7 +1320,7 @@ func TestMemoryNodeDB_Validate(t *testing.T) {
 					mutex: &sync.RWMutex{},
 				}
 			}(),
-			args:    args{root: NewExtensionNode([]byte("path"), []byte("path"))},
+			args:    args{root: NewExtensionNode([]byte("path"), []byte("path"), 0)},
 			wantErr: true,
 		},
 	}

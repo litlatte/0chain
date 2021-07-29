@@ -45,7 +45,7 @@ func makeTestStateNodes() *Nodes {
 	sn.Nodes = make([]util.Node, 0)
 	for i := 0; i < 2; i++ {
 		value := util.SecureSerializableValue{Buffer: []byte("node" + strconv.Itoa(i))}
-		node := util.NewFullNode(&value)
+		node := util.NewFullNode(&value, 0)
 		sn.Nodes = append(sn.Nodes, node)
 	}
 
@@ -208,7 +208,7 @@ func TestNodes_SaveState(t *testing.T) {
 	keys := make([]util.Key, 0)
 	for i := 0; i < 2; i++ {
 		value := util.SecureSerializableValue{Buffer: []byte("node" + strconv.Itoa(i))}
-		node := util.NewFullNode(&value)
+		node := util.NewFullNode(&value, 0)
 		nodes = append(nodes, node)
 		keys = append(keys, node.GetHashBytes())
 	}

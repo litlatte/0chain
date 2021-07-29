@@ -122,6 +122,9 @@ func (cc *ChangeCollector) UpdateChanges(ndb NodeDB, origin Sequence, includeDel
 	nodes := make([]Node, len(cc.Changes))
 	idx := 0
 	for _, c := range cc.Changes {
+		if _, ok := c.New.(*LeafNode); ok && origin != c.New.GetOrigin() {
+			fmt.Printf("Updating origin %v to %v", c.New.GetOrigin(), origin)
+		}
 		c.New.SetOrigin(origin)
 		keys[idx] = c.New.GetHashBytes()
 		nodes[idx] = c.New

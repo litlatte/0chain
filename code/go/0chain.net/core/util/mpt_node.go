@@ -301,9 +301,10 @@ type FullNode struct {
 }
 
 /*NewFullNode - create a new full node */
-func NewFullNode(value Serializable) *FullNode {
+func NewFullNode(value Serializable, origin Sequence) *FullNode {
 	fn := &FullNode{}
 	fn.OriginTrackerNode = NewOriginTrackerNode()
+	fn.SetOrigin(origin)
 	fn.SetValue(value)
 	return fn
 }
@@ -456,9 +457,10 @@ type ExtensionNode struct {
 }
 
 /*NewExtensionNode - create a new extension node */
-func NewExtensionNode(path Path, key Key) *ExtensionNode {
+func NewExtensionNode(path Path, key Key, origin Sequence) *ExtensionNode {
 	en := &ExtensionNode{}
 	en.OriginTrackerNode = NewOriginTrackerNode()
+	en.SetOrigin(origin)
 	en.Path = path
 	en.NodeKey = key
 	return en
@@ -572,9 +574,9 @@ func CreateNode(r io.Reader) (Node, error) {
 	case NodeTypeLeafNode:
 		node = NewLeafNode(nil, nil, Sequence(0), nil)
 	case NodeTypeFullNode:
-		node = NewFullNode(nil)
+		node = NewFullNode(nil, Sequence(0))
 	case NodeTypeExtensionNode:
-		node = NewExtensionNode(nil, nil)
+		node = NewExtensionNode(nil, nil, Sequence(0))
 	default:
 		panic(fmt.Sprintf("unkown node type: %v", code))
 	}

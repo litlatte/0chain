@@ -371,7 +371,7 @@ func (mpt *MerklePatriciaTrie) insertLeaf(oldNode Node, value Serializable, pref
 }
 
 func (mpt *MerklePatriciaTrie) insertExtension(oldNode Node, path Path, key Key) (Node, Key, error) {
-	return mpt.insertNode(oldNode, NewExtensionNode(path, key))
+	return mpt.insertNode(oldNode, NewExtensionNode(path, key, 0))
 }
 
 func (mpt *MerklePatriciaTrie) delete(key Key, prefix, path Path) (Node, Key, error) {
@@ -411,7 +411,7 @@ func (mpt *MerklePatriciaTrie) insertAtNode(value Serializable, node Node, prefi
 				return nil, nil, err
 			}
 
-			nnode := NewFullNode(nodeImpl.GetValue())
+			nnode := NewFullNode(nodeImpl.GetValue(), nodeImpl.GetOrigin())
 			nnode.PutChild(path[0], ckey)
 			return mpt.insertNode(node, nnode)
 		}
@@ -422,7 +422,7 @@ func (mpt *MerklePatriciaTrie) insertAtNode(value Serializable, node Node, prefi
 
 		matchPrefix := mpt.matchingPrefix(path, nodeImpl.Path)
 		plen := len(matchPrefix)
-		cnode := NewFullNode(nil)
+		cnode := NewFullNode(nil, nodeImpl.GetOrigin())
 		if bytes.Equal(matchPrefix, path) {
 			// path is a prefix of the existing leaf (node.Path = "hello world", path = "hello")
 			_, gckey2, err := mpt.insertLeaf(nil, nodeImpl.GetValue(),
@@ -496,7 +496,7 @@ func (mpt *MerklePatriciaTrie) insertAtNode(value Serializable, node Node, prefi
 			return mpt.insertNode(node, nnode)
 		}
 
-		cnode := NewFullNode(nil)
+		cnode := NewFullNode(nil, nodeImpl.GetOrigin())
 		if bytes.Equal(matchPrefix, path) {
 			// path is a prefix of the existing extension (node.Path = "hello world", path = "hello")
 			cnode.SetValue(value)
@@ -589,7 +589,7 @@ func (mpt *MerklePatriciaTrie) deleteAtNode(node Node, prefix, path Path) (Node,
 					var nnode Node
 					switch onodeImpl := ochild.(type) {
 					case *FullNode:
-						nnode = NewExtensionNode(npath, otherChildKey)
+						nnode = NewExtensionNode(npath, otherChildKey, 0)
 					case *LeafNode:
 						if onodeImpl.Path != nil {
 							npath = append(npath, onodeImpl.Path...)
@@ -682,16 +682,17 @@ func (mpt *MerklePatriciaTrie) insertAfterPathTraversal(value Serializable, node
 			return nil, nil, err
 		}
 
-		nnode := NewFullNode(value)
+		nnode := NewFullNode(value, nodeImpl.GetOrigin())
 		nnode.PutChild(nodeImpl.Path[0], ckey)
 		return mpt.insertNode(node, nnode)
 	case *ExtensionNode:
+		// todo: test this
 		// an existing extension node becomes a branch + extension node (with one less path element as it's stored in the new branch) with value on the new branch
 		_, ckey, err := mpt.insertExtension(nil, nodeImpl.Path[1:], nodeImpl.NodeKey)
 		if err != nil {
 			return nil, nil, err
 		}
-		nnode := NewFullNode(value)
+		nnode := NewFullNode(value, nodeImpl.GetOrigin())
 		nnode.PutChild(nodeImpl.Path[0], ckey)
 		return mpt.insertNode(node, nnode)
 	default:
@@ -961,33 +962,6 @@ func (mpt *MerklePatriciaTrie) FindMissingNodes(ctx context.Context) ([]Path, []
 /*IsMPTValid - checks if the merkle tree is in valid state or not */
 func IsMPTValid(mpt MerklePatriciaTrieI) error {
 	return mpt.Iterate(context.TODO(), func(ctxt context.Context, path Path, key Key, node Node) error { return nil }, NodeTypeLeafNode|NodeTypeFullNode|NodeTypeExtensionNode)
-}
-
-/*GetChanges - get the list of changes */
-func GetChanges(ctx context.Context, ndb NodeDB, start Sequence, end Sequence) (map[Sequence]MerklePatriciaTrieI, error) {
-	mpts := make(map[Sequence]MerklePatriciaTrieI, int64(end-start+1))
-	handler := func(ctx context.Context, key Key, node Node) error {
-		origin := node.GetOrigin()
-		if !(start <= origin && origin <= end) {
-			return nil
-		}
-		mpt, ok := mpts[origin]
-		if !ok {
-			mndb := NewMemoryNodeDB()
-			mpt = NewMerklePatriciaTrie(mndb, origin)
-			mpts[origin] = mpt
-		}
-		mpt.GetNodeDB().PutNode(key, node)
-		return nil
-	}
-	ndb.Iterate(ctx, handler)
-	for _, mpt := range mpts {
-		root := mpt.GetNodeDB().(*MemoryNodeDB).ComputeRoot()
-		if root != nil {
-			mpt.SetRoot(root.GetHashBytes())
-		}
-	}
-	return mpts, nil
 }
 
 //Validate - implement interface - any sort of validations that can tell if the MPT is in a sane state

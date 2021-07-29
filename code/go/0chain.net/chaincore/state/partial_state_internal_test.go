@@ -60,7 +60,7 @@ func TestPartialState_SaveState(t *testing.T) {
 	ps := NewPartialState(util.Key("key"))
 	ps.mndb = util.NewMemoryNodeDB()
 	db := util.NewMemoryNodeDB()
-	err := db.PutNode(util.Key("node key"), util.NewFullNode(&util.SecureSerializableValue{Buffer: []byte("data")}))
+	err := db.PutNode(util.Key("node key"), util.NewFullNode(&util.SecureSerializableValue{Buffer: []byte("data")}, 0))
 	require.NoError(t, err)
 
 	type fields struct {
@@ -122,7 +122,7 @@ func TestPartialState_ComputeProperties(t *testing.T) {
 
 	ps := PartialState{
 		Nodes: []util.Node{
-			util.NewFullNode(&util.SecureSerializableValue{Buffer: []byte("value")}),
+			util.NewFullNode(&util.SecureSerializableValue{Buffer: []byte("value")}, 0),
 		},
 	}
 	ps.mndb = ps.newNodeDB()
@@ -183,7 +183,7 @@ func TestPartialState_Validate(t *testing.T) {
 
 	ps := PartialState{
 		Nodes: []util.Node{
-			util.NewFullNode(&util.SecureSerializableValue{Buffer: []byte("value")}),
+			util.NewFullNode(&util.SecureSerializableValue{Buffer: []byte("value")}, 0),
 		},
 	}
 	ps.mndb = ps.newNodeDB()

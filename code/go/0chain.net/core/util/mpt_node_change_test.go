@@ -15,7 +15,7 @@ func TestChangeCollector_AddChange(t *testing.T) {
 
 	var (
 		newNode = NewValueNode()
-		oldNode = NewFullNode(&AState{balance: 2})
+		oldNode = NewFullNode(&AState{balance: 2}, 0)
 	)
 
 	type fields struct {
