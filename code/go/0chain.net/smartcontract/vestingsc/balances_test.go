@@ -7,7 +7,7 @@ import (
 	"0chain.net/core/datastore"
 	"0chain.net/core/encryption"
 	"0chain.net/core/util"
-	"github.com/0chain/gosdk/core/common/errors"
+	zchainErrors "github.com/0chain/gosdk/errors"
 )
 
 //
@@ -78,7 +78,7 @@ func (tb *testBalances) GetTrieNode(key datastore.Key) (
 	node util.Serializable, err error) {
 
 	if encryption.IsHash(key) {
-		return nil, errors.New("failed_to_get_trie_node",
+		return nil, zchainErrors.New("failed_to_get_trie_node",
 			"key is too short")
 	}
 

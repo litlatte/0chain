@@ -15,7 +15,6 @@ import (
 	"0chain.net/chaincore/transaction"
 	"0chain.net/core/common"
 	"0chain.net/core/util"
-	"github.com/0chain/gosdk/core/common/errors"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
@@ -156,7 +155,7 @@ func TestAddFreeStorageAssigner(t *testing.T) {
 
 			require.EqualValues(t, test.want.err, err != nil)
 			if err != nil {
-				require.EqualValues(t, test.want.errMsg, errors.PPrint(err))
+				require.EqualValues(t, test.want.errMsg, err.Error())
 				return
 			}
 			require.True(t, mock.AssertExpectationsForObjects(t, args.balances))
@@ -795,7 +794,7 @@ func TestUpdateFreeStorageRequest(t *testing.T) {
 
 			require.EqualValues(t, test.want.err, err != nil)
 			if err != nil {
-				require.EqualValues(t, test.want.errMsg, errors.PPrint(err))
+				require.EqualValues(t, test.want.errMsg, err.Error())
 				return
 			}
 			require.True(t, mock.AssertExpectationsForObjects(t, args.balances))
