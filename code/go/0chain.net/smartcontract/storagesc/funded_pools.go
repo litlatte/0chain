@@ -1,12 +1,13 @@
 package storagesc
 
 import (
+	"fmt"
+
 	cstate "0chain.net/chaincore/chain/state"
 	"0chain.net/core/common"
 	"0chain.net/core/datastore"
 	"0chain.net/core/util"
-	"encoding/json"
-	"fmt"
+	"github.com/goccy/go-json"
 )
 
 func fundedPoolsKey(scKey, clientID string) datastore.Key {

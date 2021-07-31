@@ -3,13 +3,14 @@ package common
 import (
 	"compress/gzip"
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
 	"regexp"
 	"strings"
+
+	"github.com/goccy/go-json"
 )
 
 /*AppErrorHeader - a http response header to send an application error code */

@@ -1,6 +1,12 @@
 package storagesc
 
 import (
+	"math"
+	"strconv"
+	"strings"
+	"testing"
+	"time"
+
 	cstate "0chain.net/chaincore/chain/state"
 	sci "0chain.net/chaincore/smartcontractinterface"
 	"0chain.net/chaincore/state"
@@ -9,13 +15,8 @@ import (
 	"0chain.net/core/common"
 	"0chain.net/core/datastore"
 	"0chain.net/core/util"
-	"encoding/json"
+	"github.com/goccy/go-json"
 	"github.com/stretchr/testify/require"
-	"math"
-	"strconv"
-	"strings"
-	"testing"
-	"time"
 )
 
 type blobberStakes []int64

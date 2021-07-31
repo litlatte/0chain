@@ -4,11 +4,12 @@ package bls
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"strconv"
 	"sync"
+
+	"github.com/goccy/go-json"
 
 	"0chain.net/core/common"
 	"0chain.net/core/datastore"

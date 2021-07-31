@@ -3,10 +3,11 @@ package state_test
 import (
 	"context"
 	"encoding/base64"
-	"encoding/json"
 	"reflect"
 	"strconv"
 	"testing"
+
+	"github.com/goccy/go-json"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"

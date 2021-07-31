@@ -1,8 +1,9 @@
 package faucetsc
 
 import (
-	"encoding/json"
 	"time"
+
+	"github.com/goccy/go-json"
 
 	"0chain.net/chaincore/state"
 	"0chain.net/core/datastore"

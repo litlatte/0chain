@@ -1,10 +1,11 @@
 package tokenpool_test
 
 import (
-	"encoding/json"
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/goccy/go-json"
 
 	"0chain.net/chaincore/state"
 	"0chain.net/chaincore/tokenpool"

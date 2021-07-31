@@ -1,12 +1,13 @@
 package minersc
 
 import (
-	"encoding/json"
 	"math/rand"
 	"strconv"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/goccy/go-json"
 
 	// "0chain.net/chaincore/chain"
 	"0chain.net/chaincore/block"

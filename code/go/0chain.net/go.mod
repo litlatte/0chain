@@ -14,6 +14,7 @@ require (
 	github.com/facebookgo/subset v0.0.0-20150612182917-8dac2c3c4870 // indirect
 	github.com/go-ini/ini v1.55.0 // indirect
 	github.com/go-playground/validator/v10 v10.6.1
+	github.com/goccy/go-json v0.0.0-00010101000000-000000000000
 	github.com/gocql/gocql v0.0.0-20190423091413-b99afaf3b163
 	github.com/golang/snappy v0.0.1
 	github.com/gomodule/redigo v2.0.0+incompatible
@@ -46,3 +47,5 @@ require (
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 	gopkg.in/yaml.v2 v2.3.0
 )
+
+replace github.com/goccy/go-json => github.com/peterlimg/go-json v0.7.7

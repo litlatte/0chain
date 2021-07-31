@@ -5,8 +5,9 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/hex"
-	"encoding/json"
 	"errors"
+
+	"github.com/goccy/go-json"
 
 	"0chain.net/core/common"
 	"0chain.net/core/datastore"

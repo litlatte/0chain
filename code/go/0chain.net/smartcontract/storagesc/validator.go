@@ -1,8 +1,9 @@
 package storagesc
 
 import (
-	"encoding/json"
 	"sort"
+
+	"github.com/goccy/go-json"
 
 	c_state "0chain.net/chaincore/chain/state"
 	"0chain.net/chaincore/transaction"

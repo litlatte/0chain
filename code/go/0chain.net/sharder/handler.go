@@ -10,6 +10,8 @@ import (
 
 	"0chain.net/chaincore/config"
 	"0chain.net/chaincore/node"
+	"0chain.net/core/logging"
+	"go.uber.org/zap"
 
 	"0chain.net/chaincore/block"
 	"0chain.net/chaincore/chain"
@@ -91,12 +93,18 @@ func MagicBlockHandler(ctx context.Context, r *http.Request) (interface{}, error
 	if err != nil {
 		return nil, err
 	}
+	logging.Logger.Debug("magic_block_handler", zap.String("hash", mbm.Hash))
 	b, err := chain.GetServerChain().GetBlock(ctx, mbm.Hash)
 	if err != nil {
+		logging.Logger.Error("magic_block_handler - get block failed", zap.Error(err))
 		lfb := sc.GetLatestFinalizedBlock()
 		for roundEntity := lfb.Round; roundEntity > 0; roundEntity -= sc.RoundRange {
 			b, err = sc.GetBlockFromStore(mbm.Hash, roundEntity)
 			if err != nil {
+				logging.Logger.Error("magic_block_handler - get block from store failed",
+					zap.Error(err),
+					zap.String("hash", mbm.Hash),
+					zap.Int64("round entity", roundEntity))
 				return nil, err
 			}
 		}

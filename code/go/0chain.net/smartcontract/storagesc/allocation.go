@@ -1,13 +1,14 @@
 package storagesc
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"math/rand"
 	"sort"
 	"strconv"
 	"time"
+
+	"github.com/goccy/go-json"
 
 	chainstate "0chain.net/chaincore/chain/state"
 	"0chain.net/chaincore/state"

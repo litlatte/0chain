@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
@@ -10,6 +9,8 @@ import (
 	"math/rand"
 	"net/http"
 	"time"
+
+	"github.com/goccy/go-json"
 
 	"0chain.net/core/common"
 	"0chain.net/encryption"

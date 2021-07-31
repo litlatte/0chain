@@ -1,10 +1,11 @@
 package chain
 
 import (
-	"encoding/json"
 	"math"
 	"net/http"
 	"sort"
+
+	"github.com/goccy/go-json"
 
 	"0chain.net/chaincore/block"
 

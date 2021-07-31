@@ -2,10 +2,11 @@ package block
 
 import (
 	"context"
-	"encoding/json"
 	"reflect"
 	"strconv"
 	"testing"
+
+	"github.com/goccy/go-json"
 
 	"0chain.net/core/datastore"
 	"0chain.net/core/encryption"

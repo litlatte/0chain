@@ -2,11 +2,12 @@ package main
 
 import (
 	"encoding/hex"
-	"encoding/json"
 	"fmt"
 	"os"
 	"sort"
 	"time"
+
+	"github.com/goccy/go-json"
 
 	"go.uber.org/zap"
 

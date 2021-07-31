@@ -2,10 +2,11 @@ package block
 
 import (
 	"encoding/hex"
-	"encoding/json"
 	"sort"
 	"strconv"
 	"sync"
+
+	"github.com/goccy/go-json"
 
 	"0chain.net/chaincore/node"
 	"0chain.net/core/datastore"

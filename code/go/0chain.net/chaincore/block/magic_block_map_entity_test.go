@@ -5,6 +5,8 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/goccy/go-json"
+
 	"0chain.net/core/datastore"
 	"0chain.net/core/mocks"
 	"github.com/stretchr/testify/require"

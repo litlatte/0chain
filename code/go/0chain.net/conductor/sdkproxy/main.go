@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"crypto/tls"
-	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
@@ -16,6 +15,8 @@ import (
 	"os/signal"
 	"strings"
 	"sync"
+
+	"github.com/goccy/go-json"
 )
 
 const (

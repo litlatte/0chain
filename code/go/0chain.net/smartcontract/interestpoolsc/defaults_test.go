@@ -1,9 +1,10 @@
 package interestpoolsc
 
 import (
-	"encoding/json"
 	"fmt"
 	"time"
+
+	"github.com/goccy/go-json"
 
 	"0chain.net/chaincore/config"
 	"0chain.net/chaincore/state"

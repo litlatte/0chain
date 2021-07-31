@@ -2,12 +2,13 @@ package block
 
 import (
 	"encoding/hex"
-	"encoding/json"
 	"reflect"
 	"sort"
 	"strconv"
 	"sync"
 	"testing"
+
+	"github.com/goccy/go-json"
 
 	"0chain.net/chaincore/client"
 	"0chain.net/chaincore/node"

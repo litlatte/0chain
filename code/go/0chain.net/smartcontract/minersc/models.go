@@ -1,7 +1,6 @@
 package minersc
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"math"
@@ -11,6 +10,8 @@ import (
 	"sort"
 	"strings"
 	"sync"
+
+	"github.com/goccy/go-json"
 
 	"0chain.net/chaincore/block"
 	cstate "0chain.net/chaincore/chain/state"

@@ -2,7 +2,6 @@ package transaction
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -10,6 +9,8 @@ import (
 	"strings"
 	"sync/atomic"
 	"time"
+
+	"github.com/goccy/go-json"
 
 	"0chain.net/chaincore/client"
 	"0chain.net/chaincore/config"

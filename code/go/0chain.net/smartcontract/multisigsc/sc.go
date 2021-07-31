@@ -1,12 +1,13 @@
 package multisigsc
 
 import (
-	"0chain.net/chaincore/smartcontract"
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/url"
 	"time"
+
+	"0chain.net/chaincore/smartcontract"
+	"github.com/goccy/go-json"
 
 	"0chain.net/chaincore/chain/state"
 	c_state "0chain.net/chaincore/chain/state"

@@ -1,13 +1,14 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"math"
 	"strconv"
+
+	"github.com/goccy/go-json"
 
 	"0chain.net/chaincore/block"
 	"0chain.net/chaincore/node"

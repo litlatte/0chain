@@ -1,8 +1,9 @@
 package block
 
 import (
-	"encoding/json"
 	"sort"
+
+	"github.com/goccy/go-json"
 
 	"0chain.net/core/logging"
 

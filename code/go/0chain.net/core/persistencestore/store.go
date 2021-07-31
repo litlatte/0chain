@@ -8,7 +8,9 @@ import (
 
 	"0chain.net/core/common"
 	"0chain.net/core/datastore"
+	"0chain.net/core/logging"
 	"github.com/gocql/gocql"
+	"go.uber.org/zap"
 )
 
 /*BATCH_SIZE size of the batch */
@@ -56,25 +58,25 @@ func (ps *Store) Read(ctx context.Context, key datastore.Key, entity datastore.E
 	c := GetCon(ctx)
 	emd := entity.GetEntityMetadata()
 	iter := c.Query(getJSONSelect(emd.GetName(), emd.GetIDColumnName()), key).Iter()
-	var json string
-	valid := iter.Scan(&json)
+	defer func() {
+		if err := iter.Close(); err != nil {
+			logging.Logger.Error("persistent store iter close failed", zap.Error(err))
+		}
+	}()
+	var data string
+	valid := iter.Scan(&data)
 	if !valid {
 		return common.NewError(datastore.EntityNotFound, fmt.Sprintf("%v not found with id = %v", emd.GetName(), key))
 	}
-	datastore.FromJSON(json, entity)
-	if err := iter.Close(); err != nil {
-		return err
-	}
-	return nil
+	return datastore.FromJSON(data, entity)
 }
 
 /*Write - write an entity to the store */
 func (ps *Store) Write(ctx context.Context, entity datastore.Entity) error {
 	c := GetCon(ctx)
 	emd := entity.GetEntityMetadata()
-	json := datastore.ToJSON(entity).String()
-	err := c.Query(getJSONInsert(emd.GetName()), json).Exec()
-	return err
+	data := datastore.ToJSON(entity).String()
+	return c.Query(getJSONInsert(emd.GetName()), data).Exec()
 }
 
 /*InsertIfNE - insert an entity to the store if it doesn't exist */

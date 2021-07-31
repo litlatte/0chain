@@ -3,7 +3,6 @@ package chain
 import (
 	"bufio"
 	"context"
-	"encoding/json"
 	"fmt"
 	"html/template"
 	"io/ioutil"
@@ -15,6 +14,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/goccy/go-json"
 
 	"0chain.net/chaincore/block"
 	"0chain.net/chaincore/config"

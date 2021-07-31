@@ -2,11 +2,12 @@ package chain
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/goccy/go-json"
 
 	"0chain.net/chaincore/block"
 	"0chain.net/chaincore/config"

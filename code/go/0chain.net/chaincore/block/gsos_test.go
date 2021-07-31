@@ -2,11 +2,12 @@ package block
 
 import (
 	"encoding/hex"
-	"encoding/json"
 	"reflect"
 	"sort"
 	"sync"
 	"testing"
+
+	"github.com/goccy/go-json"
 
 	"0chain.net/core/encryption"
 	"0chain.net/core/util"

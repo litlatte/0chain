@@ -3,8 +3,9 @@ package memorystore
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
+
+	"github.com/goccy/go-json"
 
 	"0chain.net/core/common"
 	"0chain.net/core/datastore"

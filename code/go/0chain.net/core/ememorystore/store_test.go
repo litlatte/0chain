@@ -3,11 +3,12 @@ package ememorystore_test
 import (
 	"context"
 	"encoding/binary"
-	"encoding/json"
 	"errors"
 	"os"
 	"reflect"
 	"testing"
+
+	"github.com/goccy/go-json"
 
 	"github.com/0chain/gorocksdb"
 	"github.com/stretchr/testify/assert"

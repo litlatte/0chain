@@ -1,8 +1,9 @@
 package interestpoolsc
 
 import (
-	"encoding/json"
 	"time"
+
+	"github.com/goccy/go-json"
 
 	"0chain.net/chaincore/state"
 	// "0chain.net/chaincore/transaction"
@@ -48,5 +49,3 @@ func (ps *poolStat) decode(input []byte) error {
 	err := json.Unmarshal(input, ps)
 	return err
 }
-
-

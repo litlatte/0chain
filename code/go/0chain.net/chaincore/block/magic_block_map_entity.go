@@ -2,8 +2,10 @@ package block
 
 import (
 	"context"
-	"encoding/json"
+
 	"strconv"
+
+	"github.com/goccy/go-json"
 
 	"0chain.net/core/datastore"
 )

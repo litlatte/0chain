@@ -3,10 +3,11 @@ package state_test
 import (
 	"context"
 	"encoding/base64"
-	"encoding/json"
 	"reflect"
 	"strconv"
 	"testing"
+
+	"github.com/goccy/go-json"
 
 	. "0chain.net/chaincore/state"
 	"0chain.net/core/datastore"

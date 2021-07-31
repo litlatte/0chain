@@ -1,8 +1,9 @@
 package interestpoolsc
 
 import (
-	"encoding/json"
 	"time"
+
+	"github.com/goccy/go-json"
 )
 
 type newPoolRequest struct {

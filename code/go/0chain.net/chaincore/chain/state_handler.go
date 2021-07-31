@@ -2,13 +2,14 @@ package chain
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"reflect"
 	"regexp"
 	"sort"
 	"strings"
+
+	"github.com/goccy/go-json"
 
 	"0chain.net/chaincore/smartcontract"
 	"0chain.net/chaincore/transaction"

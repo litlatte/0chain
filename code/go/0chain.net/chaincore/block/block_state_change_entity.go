@@ -2,7 +2,8 @@ package block
 
 import (
 	"context"
-	"encoding/json"
+
+	"github.com/goccy/go-json"
 
 	"0chain.net/chaincore/state"
 	"0chain.net/core/common"

@@ -2,7 +2,6 @@ package chain
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"math"
@@ -10,6 +9,8 @@ import (
 	"sort"
 	"sync"
 	"time"
+
+	"github.com/goccy/go-json"
 
 	"go.uber.org/zap"
 

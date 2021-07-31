@@ -3,7 +3,6 @@ package block
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"math"
@@ -11,6 +10,8 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/goccy/go-json"
 
 	"0chain.net/chaincore/client"
 	"0chain.net/chaincore/config"

@@ -1,13 +1,14 @@
 package vestingsc
 
 import (
-	"0chain.net/core/common"
-	"0chain.net/smartcontract"
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/url"
 	"sort"
+
+	"0chain.net/core/common"
+	"0chain.net/smartcontract"
+	"github.com/goccy/go-json"
 
 	chainstate "0chain.net/chaincore/chain/state"
 	"0chain.net/core/datastore"

@@ -2,10 +2,11 @@ package block
 
 import (
 	"encoding/hex"
-	"encoding/json"
 	"reflect"
 	"sort"
 	"testing"
+
+	"github.com/goccy/go-json"
 
 	"0chain.net/chaincore/threshold/bls"
 	"0chain.net/core/encryption"

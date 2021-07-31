@@ -2,8 +2,9 @@ package smartcontractinterface
 
 import (
 	"context"
-	"encoding/json"
 	"net/url"
+
+	"github.com/goccy/go-json"
 
 	c_state "0chain.net/chaincore/chain/state"
 	"0chain.net/chaincore/transaction"

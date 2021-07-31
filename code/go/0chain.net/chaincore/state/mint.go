@@ -1,7 +1,7 @@
 package state
 
 import (
-	"encoding/json"
+	"github.com/goccy/go-json"
 
 	"0chain.net/core/common"
 	"0chain.net/core/datastore"

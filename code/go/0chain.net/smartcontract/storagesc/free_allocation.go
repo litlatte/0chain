@@ -1,6 +1,9 @@
 package storagesc
 
 import (
+	"encoding/hex"
+	"fmt"
+
 	"0chain.net/chaincore/chain"
 	cstate "0chain.net/chaincore/chain/state"
 	"0chain.net/chaincore/state"
@@ -8,9 +11,7 @@ import (
 	"0chain.net/core/common"
 	"0chain.net/core/datastore"
 	"0chain.net/core/util"
-	"encoding/hex"
-	"encoding/json"
-	"fmt"
+	"github.com/goccy/go-json"
 )
 
 const (

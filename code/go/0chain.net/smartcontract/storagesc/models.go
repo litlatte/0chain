@@ -1,14 +1,16 @@
 package storagesc
 
 import (
-	chainstate "0chain.net/chaincore/chain/state"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"math"
 	"math/bits"
 	"strings"
 	"time"
+
+	chainstate "0chain.net/chaincore/chain/state"
+
+	"github.com/goccy/go-json"
 
 	"0chain.net/chaincore/chain"
 	"0chain.net/chaincore/node"

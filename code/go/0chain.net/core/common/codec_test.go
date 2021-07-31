@@ -2,11 +2,12 @@ package common_test
 
 import (
 	"bytes"
-	"encoding/json"
 	"io"
 	"reflect"
 	"sync"
 	"testing"
+
+	"github.com/goccy/go-json"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

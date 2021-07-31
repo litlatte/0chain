@@ -1,11 +1,12 @@
 package faucetsc
 
 import (
-	"0chain.net/smartcontract"
 	"context"
 	"fmt"
 	"time"
-	// "encoding/json"
+
+	"0chain.net/smartcontract"
+
 	"net/url"
 
 	c_state "0chain.net/chaincore/chain/state"

@@ -3,13 +3,14 @@ package datastore_test
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"errors"
 	"log"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
 	"testing"
+
+	"github.com/goccy/go-json"
 
 	"github.com/stretchr/testify/mock"
 

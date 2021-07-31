@@ -2,9 +2,10 @@ package common
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"io"
+
+	"github.com/goccy/go-json"
 
 	. "0chain.net/core/logging"
 	"github.com/vmihailenco/msgpack"

@@ -4,7 +4,8 @@ import (
 	"bytes"
 	"context"
 	"encoding/base64"
-	"encoding/json"
+
+	"github.com/goccy/go-json"
 
 	"0chain.net/core/common"
 	"0chain.net/core/datastore"

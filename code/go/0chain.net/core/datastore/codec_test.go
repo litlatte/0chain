@@ -2,10 +2,11 @@ package datastore_test
 
 import (
 	"bytes"
-	"encoding/json"
 	"io"
 	"reflect"
 	"testing"
+
+	"github.com/goccy/go-json"
 
 	"github.com/vmihailenco/msgpack"
 

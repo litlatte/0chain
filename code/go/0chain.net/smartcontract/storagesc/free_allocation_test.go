@@ -1,6 +1,11 @@
 package storagesc
 
 import (
+	"encoding/hex"
+	"strconv"
+	"testing"
+	"time"
+
 	"0chain.net/chaincore/chain"
 	cstate "0chain.net/chaincore/chain/state"
 	"0chain.net/chaincore/mocks"
@@ -9,13 +14,9 @@ import (
 	"0chain.net/chaincore/transaction"
 	"0chain.net/core/common"
 	"0chain.net/core/util"
-	"encoding/hex"
-	"encoding/json"
+	"github.com/goccy/go-json"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	"strconv"
-	"testing"
-	"time"
 )
 
 func TestAddFreeStorageAssigner(t *testing.T) {

@@ -2,12 +2,13 @@ package common
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
 	"testing"
+
+	"github.com/goccy/go-json"
 
 	"go.uber.org/zap"
 
