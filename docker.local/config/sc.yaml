@@ -103,8 +103,8 @@ smart_contracts:
     # allocation settings for free storage
     # these values are applied to all free allocations
     free_allocation_settings:
-      data_shards: 10
-      parity_shards: 5
+      data_shards: 1
+      parity_shards: 1
       size: 10000000000
       duration: 5000h
       read_price_range:
