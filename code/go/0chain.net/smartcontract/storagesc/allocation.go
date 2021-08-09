@@ -13,7 +13,9 @@ import (
 	"0chain.net/chaincore/state"
 	"0chain.net/chaincore/transaction"
 	"0chain.net/core/common"
+	"0chain.net/core/logging"
 	"0chain.net/core/util"
+	"go.uber.org/zap"
 )
 
 // getAllocation by ID
@@ -309,6 +311,8 @@ func (sc *StorageSmartContract) newAllocationRequestInternal(
 	mintNewTokens bool,
 	balances chainstate.StateContextI,
 ) (resp string, err error) {
+	logging.Logger.Info("allocation_request_in", zap.String("input", string(input)))
+
 	var allBlobbersList *StorageNodes
 	allBlobbersList, err = sc.getBlobbersList(balances)
 	if err != nil {

@@ -1,7 +1,6 @@
 package storagesc
 
 import (
-	chainstate "0chain.net/chaincore/chain/state"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -10,12 +9,16 @@ import (
 	"strings"
 	"time"
 
+	chainstate "0chain.net/chaincore/chain/state"
+	"go.uber.org/zap"
+
 	"0chain.net/chaincore/chain"
 	"0chain.net/chaincore/node"
 	"0chain.net/chaincore/state"
 	"0chain.net/core/common"
 	"0chain.net/core/datastore"
 	"0chain.net/core/encryption"
+	"0chain.net/core/logging"
 	"0chain.net/core/util"
 )
 
@@ -711,22 +714,32 @@ List:
 	for _, b := range list {
 		// filter by max offer duration
 		if b.Terms.MaxOfferDuration < dur {
+			logging.Logger.Info("allocation_request_in", zap.Any("condition", "b.Terms.MaxOfferDuration < dur"),
+				zap.Any("MaxOfferDuration", b.Terms.MaxOfferDuration), zap.Any("dur", dur))
 			continue
 		}
 		// filter by read price
 		if !sa.ReadPriceRange.isMatch(b.Terms.ReadPrice) {
+			logging.Logger.Info("allocation_request_in", zap.Any("condition", "!sa.ReadPriceRange.isMatch(b.Terms.ReadPrice)"),
+				zap.Any("sa.ReadPriceRange", sa.ReadPriceRange), zap.Any("b.Terms.ReadPrice", b.Terms.ReadPrice))
 			continue
 		}
 		// filter by write price
 		if !sa.WritePriceRange.isMatch(b.Terms.WritePrice) {
+			logging.Logger.Info("allocation_request_in", zap.Any("condition", "!sa.WritePriceRange.isMatch(b.Terms.WritePrice)"),
+				zap.Any("sa.WritePriceRange", sa.WritePriceRange), zap.Any("b.Terms.WritePrice", b.Terms.WritePrice))
 			continue
 		}
 		// filter by blobber's capacity left
 		if b.Capacity-b.Used < bsize {
+			logging.Logger.Info("allocation_request_in", zap.Any("condition", "b.Capacity-b.Used < bsize"),
+				zap.Any("b.Capacity-b.Used", b.Capacity-b.Used), zap.Any("bsize", bsize))
 			continue
 		}
 		// filter by max challenge completion time
 		if b.Terms.ChallengeCompletionTime > sa.MaxChallengeCompletionTime {
+			logging.Logger.Info("allocation_request_in", zap.Any("condition", "b.Terms.ChallengeCompletionTime > sa.MaxChallengeCompletionTime"),
+				zap.Any("b.Terms.ChallengeCompletionTime", b.Terms.ChallengeCompletionTime), zap.Any("sa.MaxChallengeCompletionTime", sa.MaxChallengeCompletionTime))
 			continue
 		}
 		for _, filter := range filters {
