@@ -744,6 +744,9 @@ List:
 		}
 		for _, filter := range filters {
 			if filter(b) {
+				logging.Logger.Info("allocation_request_in", zap.Any("condition", "for _, filter := range filters"),
+					zap.Any("filter", filter), zap.Any("b", b))
+
 				continue List
 			}
 		}
