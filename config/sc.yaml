@@ -58,7 +58,7 @@ smart_contracts:
       data_shards: 1
       parity_shards: 1
       size: 10000000000
-      duration: 5000h
+      duration: 50h
       read_price_range:
         min: 0.0
         max: 0.04
