@@ -1,16 +1,19 @@
 package storagesc
 
 import (
+	"encoding/hex"
+	"encoding/json"
+	"fmt"
+
 	"0chain.net/chaincore/chain"
 	cstate "0chain.net/chaincore/chain/state"
 	"0chain.net/chaincore/state"
 	"0chain.net/chaincore/transaction"
 	"0chain.net/core/common"
 	"0chain.net/core/datastore"
+	"0chain.net/core/logging"
 	"0chain.net/core/util"
-	"encoding/hex"
-	"encoding/json"
-	"fmt"
+	"go.uber.org/zap"
 )
 
 const (
@@ -230,6 +233,9 @@ func (ssc *StorageSmartContract) freeAllocationRequest(
 		return "", common.NewErrorf("free_allocation_failed",
 			"marker verification failed: %v", err)
 	}
+
+	logging.Logger.Info("allocation_request_in", zap.Any("txn.CreationDate", txn.CreationDate),
+		zap.Any("conf.FreeAllocationSettings.Duration", conf.FreeAllocationSettings.Duration))
 
 	var request = newAllocationRequest{
 		DataShards:                 conf.FreeAllocationSettings.DataShards,
