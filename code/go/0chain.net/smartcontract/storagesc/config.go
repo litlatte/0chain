@@ -447,6 +447,10 @@ func getConfiguredConfig() (conf *scConfig, err error) {
 	)
 
 	err = conf.validate()
+
+	out, _ := json.Marshal(conf)
+	logging.Logger.Info("allocation_request_in", zap.String("config", string(out)))
+
 	return
 }
 
