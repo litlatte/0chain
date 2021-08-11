@@ -234,6 +234,9 @@ func (ssc *StorageSmartContract) freeAllocationRequest(
 			"marker verification failed: %v", err)
 	}
 
+	outConf, _ := json.Marshal(conf)
+	logging.Logger.Info("allocation_request_in", zap.String("config", string(outConf)))
+
 	logging.Logger.Info("allocation_request_in", zap.Any("txn.CreationDate", txn.CreationDate),
 		zap.Any("conf.FreeAllocationSettings.Duration", conf.FreeAllocationSettings.Duration))
 
