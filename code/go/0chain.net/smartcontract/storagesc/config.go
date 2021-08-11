@@ -1,12 +1,14 @@
 package storagesc
 
 import (
-	"0chain.net/smartcontract"
 	"context"
 	"encoding/json"
 	"fmt"
 	"net/url"
 	"time"
+
+	"0chain.net/smartcontract"
+	"go.uber.org/zap"
 
 	chainState "0chain.net/chaincore/chain/state"
 	"0chain.net/chaincore/config"
@@ -14,6 +16,7 @@ import (
 	"0chain.net/chaincore/transaction"
 	"0chain.net/core/common"
 	"0chain.net/core/datastore"
+	"0chain.net/core/logging"
 	"0chain.net/core/util"
 )
 
@@ -231,7 +234,7 @@ func (sc *scConfig) validate() (err error) {
 			sc.FreeAllocationSettings.Size)
 	}
 	if sc.FreeAllocationSettings.Duration <= 0 {
-		return fmt.Errorf("negative free_allocation_settings.expiration_date: %v",
+		return fmt.Errorf("negative free_allocation_settings.duration: %v",
 			sc.FreeAllocationSettings.Duration)
 	}
 	if !sc.FreeAllocationSettings.ReadPriceRange.isValid() {
