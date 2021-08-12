@@ -20,10 +20,14 @@ sharder:
     bucketName: sdvadva
     bucketRegion: dfafdvad
 
+  zchainConfig:
+    view_change: "false"
+    magma: "false"
+
   sharderImage:
     repository: 0chaindev/sharder
-    pullPolicy: Always
-    tag: master-79742f53
+    pullPolicy: IfNotPresent
+    tag: test-artem-test-only-188b75a4
 
   imagePullSecrets: 
     - name: regcred
@@ -60,11 +64,11 @@ sharder:
     nodePort: 3110
 
   ############## Sharder FileBeat ################
-  sharderFilebeatImage:
-    repository: docker.elastic.co/beats/filebeat
-    tag: "7.8.0"
+  sharderPromtailImage:
+    repository: grafana/promtail
+    tag: master
 
-  sharderFilebeatResources:
+  sharderPromtailResources:
     requests:
       cpu: "50m"
       memory: "50Mi"
@@ -167,7 +171,7 @@ miner:
     repository: 0chaindev/miner
     pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
-    tag: master-79742f53
+    tag: test-artem-test-only-188b75a4
 
   imagePullSecrets: 
     - name: regcred
@@ -204,12 +208,12 @@ miner:
     nodePort: 3120
     type: NodePort
 
-  ############## Miner FileBeat ################
-  minerFilebeatImage:
-    repository: docker.elastic.co/beats/filebeat
-    tag: "7.8.0"
+  ############## Miner PromTail ################
+  minerPromtailImage:
+    repository: grafana/promtail
+    tag: master
 
-  minerFilebeatResources:
+  minerPromtailResources:
     requests:
       cpu: "50m"
       memory: "50Mi"

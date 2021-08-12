@@ -6,8 +6,8 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   labels:
-    {{- include "0helm-0chain.labels" $ | nindent 6 }}-cassandra-init-0{{ $i }}
-  name: {{ include "0helm-0chain.fullname" $ | nindent 4 }}-cassandra-init-0{{ $i }}
+    {{- include "0helm.labels" $ | nindent 6 }}-cassandra-init-0{{ $i }}
+  name: {{ include "0helm.fullname" $ | nindent 4 }}-cassandra-init-0{{ $i }}
 spec:
   template:
     spec:
@@ -16,7 +16,7 @@ spec:
           name: {{ $.Release.Name }}-cassandra-init-0{{ $i }}
           env:
             - name: CASSANDRA_HOST
-              value: {{ include "0helm-0chain.fullname" $ | nindent 15 }}-cassandra-0{{ $i }}
+              value: {{ include "0helm.fullname" $ | nindent 15 }}-cassandra-0{{ $i }}
           resources:
             {{- toYaml $.Values.sharder.cassandraInitResources | nindent 12 }} 
           args:

@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   labels:
-    {{- include "0helm-0chain.labels" $ | nindent 6 }}-owner-config
+    {{- include "0helm.labels" $ | nindent 6 }}-owner-config
   creationTimestamp: null
   name: owner-config
 data:

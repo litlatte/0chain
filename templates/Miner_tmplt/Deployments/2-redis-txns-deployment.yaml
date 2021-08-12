@@ -7,20 +7,20 @@ kind: Deployment
 metadata:
   annotations:
   labels:
-    {{- include "0helm-0chain.labels" $ | nindent 6 }}-redis-txns-0{{ $i }}
-  name: {{ include "0helm-0chain.fullname" $ | nindent 4 }}-redis-txns-0{{ $i }}
+    {{- include "0helm.labels" $ | nindent 6 }}-redis-txns-0{{ $i }}
+  name: {{ include "0helm.fullname" $ | nindent 4 }}-redis-txns-0{{ $i }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      {{- include "0helm-0chain.selectorLabels" $ | nindent 6 }}-redis-txns-0{{ $i }}
+      {{- include "0helm.selectorLabels" $ | nindent 6 }}-redis-txns-0{{ $i }}
   strategy:
     type: Recreate
   template:
     metadata:
       creationTimestamp: null
       labels:
-        {{- include "0helm-0chain.labels" $ | nindent 8 }}-redis-txns-0{{ $i }}
+        {{- include "0helm.labels" $ | nindent 8 }}-redis-txns-0{{ $i }}
     spec:
       affinity:
         podAffinity:

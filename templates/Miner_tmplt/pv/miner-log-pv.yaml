@@ -7,7 +7,7 @@ kind: PersistentVolume
 metadata:
   name: miner-log-pv-0{{ $i }}
   labels:
-    {{- include "0helm-0chain.labels" $ | nindent 4 }}-miner-log-pv-0{{ $i }}
+    {{- include "0helm.labels" $ | nindent 4 }}-miner-log-pv-0{{ $i }}
 spec:
   storageClassName: {{ $.Values.miner.persistence.storageClass_log_pv }}{{ $i }}
   # claimRef:

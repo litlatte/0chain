@@ -6,19 +6,19 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    {{- include "0helm-0chain.labels" $ | nindent 6 }}-miner-0{{ $i }}
-  name: {{ include "0helm-0chain.fullname" $ | nindent 4 }}-miner-0{{ $i }}
+    {{- include "0helm.labels" $ | nindent 6 }}-miner-0{{ $i }}
+  name: {{ include "0helm.fullname" $ | nindent 4 }}-miner-0{{ $i }}
 spec:
   replicas: {{ $.Values.miner.replicaCount }}
   selector:
     matchLabels:
-      {{- include "0helm-0chain.selectorLabels" $ | nindent 6 }}-miner-0{{ $i }}
+      {{- include "0helm.selectorLabels" $ | nindent 6 }}-miner-0{{ $i }}
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        {{- include "0helm-0chain.labels" $ | nindent 8 }}-miner-0{{ $i }}
+        {{- include "0helm.labels" $ | nindent 8 }}-miner-0{{ $i }}
     spec:
       affinity:
         podAffinity:
@@ -42,9 +42,9 @@ spec:
             - mkdir -p /0chain/data/rocksdb && mkdir -p /0chain/data/redis/state && mkdir -p /0chain/data/redis/transactions &&  chmod -R 777 /0chain/data/redis && ./bin/miner --deployment_mode 0 --keys_file config/b0mnode0{{ $i }}_keys.txt --dkg_file config/b0mnode0{{ $i }}_dkg.json --delay_file config/n2n_delay.yaml
           env:
             - name: REDIS_HOST
-              value: {{ include "0helm-0chain.fullname" $ | nindent 15 }}-redis-0{{ $i }}
+              value: {{ include "0helm.fullname" $ | nindent 15 }}-redis-0{{ $i }}
             - name: REDIS_TXNS
-              value: {{ include "0helm-0chain.fullname" $ | nindent 15 }}-redis-txns-0{{ $i }}
+              value: {{ include "0helm.fullname" $ | nindent 15 }}-redis-txns-0{{ $i }}
             {{- range $key, $value := $.Values.miner.minerEnv }}
             - name: {{ $key }}
               value: {{ $value | quote }}
@@ -85,6 +85,20 @@ spec:
               name: miner-data-pvc-0{{ $i }}
             - mountPath: /0chain/log
               name: miner-log-pvc-0{{ $i }}
+        - name: {{ $.Release.Name }}-promtail-0{{ $i }}
+          image: {{ $.Values.miner.minerPromtailImage.repository }}:{{ $.Values.miner.minerPromtailImage.tag }} #promtail use mirror
+          args:
+            - "-config.file=/etc/promtail/promtail.yaml" #promtail configuration file path
+            - "-client.url=http://loki.default.svc.cluster.local:3100/api/prom/push" #lokiServer
+          resources:
+            {{- toYaml $.Values.miner.minerPromtailResources | nindent 12 }}
+          volumeMounts:
+            - name: promtail-config
+              mountPath: /etc/promtail
+            - name: run
+              mountPath: /run/promtail
+            - name: miner-log-pvc-0{{ $i }}
+              mountPath: /0chain/log
       {{- with $.Values.miner.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
@@ -137,5 +151,10 @@ spec:
           configMap:
             name: initial-state
             defaultMode: 0755
-
+        - name: promtail-config
+          configMap:
+            name: promtail-miner-0{{ $i }}
+        - name: run
+          hostPath:
+            path: {{ $.Values.miner.persistence.pvHostPath }}miner-promtail-run-0{{ $i }}
 {{- end }}

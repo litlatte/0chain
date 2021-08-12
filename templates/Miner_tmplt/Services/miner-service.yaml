@@ -6,8 +6,8 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    {{- include "0helm-0chain.labels" $ | nindent 6 }}-miner-0{{ $i }}
-  name: {{ include "0helm-0chain.fullname" $ | nindent 4 }}-miner-0{{ $i }}
+    {{- include "0helm.labels" $ | nindent 6 }}-miner-0{{ $i }}
+  name: {{ include "0helm.fullname" $ | nindent 4 }}-miner-0{{ $i }}
 spec:
   ports:
   - name: "{{ $.Values.miner.minerService.port }}{{ $i }}"
@@ -16,6 +16,6 @@ spec:
     targetPort: {{ $.Values.miner.minerService.targetPort }}{{ $i }}
   type: {{ $.Values.miner.minerService.type }}
   selector:
-    {{- include "0helm-0chain.selectorLabels" $ | nindent 6 }}-miner-0{{ $i }}
+    {{- include "0helm.selectorLabels" $ | nindent 6 }}-miner-0{{ $i }}
 
 {{- end }}

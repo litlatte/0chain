@@ -6,19 +6,19 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    {{- include "0helm-0chain.labels" $ | nindent 6 }}-sharder-0{{ $i }}
-  name: {{ include "0helm-0chain.fullname" $ | nindent 4 }}-sharder-0{{ $i }}
+    {{- include "0helm.labels" $ | nindent 6 }}-sharder-0{{ $i }}
+  name: {{ include "0helm.fullname" $ | nindent 4 }}-sharder-0{{ $i }}
 spec:
   replicas: {{ $.Values.sharder.replicaCount | int }}
   selector:
     matchLabels:
-      {{- include "0helm-0chain.selectorLabels" $ | nindent 6 }}-sharder-0{{ $i }}
+      {{- include "0helm.selectorLabels" $ | nindent 6 }}-sharder-0{{ $i }}
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        {{- include "0helm-0chain.labels" $ | nindent 8 }}-sharder-0{{ $i }}
+        {{- include "0helm.labels" $ | nindent 8 }}-sharder-0{{ $i }}
     spec:
       affinity:
         podAffinity:
@@ -44,7 +44,7 @@ spec:
             - mkdir -p /0chain/data/blocks && mkdir -p /0chain/data/rocksdb && ./bin/sharder --deployment_mode 0 --keys_file config/b0snode0{{ $i }}_keys.txt --minio_file config/minio_config.txt
           env:
             - name: CASSANDRA_CLUSTER
-              value: {{ include "0helm-0chain.fullname" $ | nindent 15 }}-cassandra-0{{ $i }}
+              value: {{ include "0helm.fullname" $ | nindent 15 }}-cassandra-0{{ $i }}
             {{- range $key, $value := $.Values.sharder.sharderEnv }}
             - name: {{ $key }}
               value: {{ $value | quote }}
@@ -83,6 +83,20 @@ spec:
               name: sharder-log-pvc-0{{ $i }}
             - mountPath: /0chain/data
               name: sharder-data-pvc-0{{ $i }}
+        - name: {{ $.Release.Name }}-promtail-0{{ $i }}
+          image: {{ $.Values.sharder.sharderPromtailImage.repository }}:{{ $.Values.sharder.sharderPromtailImage.tag }} #promtail use mirror
+          args:
+            - "-config.file=/etc/promtail/promtail.yaml" #promtail configuration file path
+            - "-client.url=http://loki.default.svc.cluster.local:3100/api/prom/push" #lokiServer
+          resources:
+            {{- toYaml $.Values.sharder.sharderPromtailResources | nindent 12 }}
+          volumeMounts:
+            - name: promtail-config
+              mountPath: /etc/promtail
+            - name: run
+              mountPath: /run/promtail
+            - name: sharder-log-pvc-0{{ $i }}
+              mountPath: /0chain/log
       {{- with $.Values.sharder.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
@@ -156,5 +170,10 @@ spec:
               - key: wait-for-service.sh
                 path: wait-for-service.sh
             defaultMode: 0755
-
+        - name: promtail-config
+          configMap:
+            name: promtail-sharder-0{{ $i }}
+        - name: run
+          hostPath:
+            path: {{ $.Values.sharder.persistence.pvHostPath }}sharder-promtail-run-0{{ $i }}
 {{- end }}

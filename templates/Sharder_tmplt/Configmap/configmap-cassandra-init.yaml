@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   labels:
-    {{- include "0helm-0chain.labels" $ | nindent 6 }}-cassandra-init
+    {{- include "0helm.labels" $ | nindent 6 }}-cassandra-init
   creationTimestamp: null
   name: cassandra-init
 data:

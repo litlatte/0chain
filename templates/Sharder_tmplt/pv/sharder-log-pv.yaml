@@ -7,7 +7,7 @@ kind: PersistentVolume
 metadata:
   name: sharder-log-pv-0{{ $i }}
   labels:
-    {{- include "0helm-0chain.labels" $ | nindent 4 }}-sharder-log-pv-0{{ $i }}
+    {{- include "0helm.labels" $ | nindent 4 }}-sharder-log-pv-0{{ $i }}
 spec:
   storageClassName: {{ $.Values.sharder.persistence.storageClass_log_pv }}{{ $i }}
   capacity:

@@ -6,19 +6,19 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    {{- include "0helm-0chain.labels" $ | nindent 6 }}-cassandra-0{{ $i }}
-  name: {{ include "0helm-0chain.fullname" $ | nindent 4 }}-cassandra-0{{ $i }}
+    {{- include "0helm.labels" $ | nindent 6 }}-cassandra-0{{ $i }}
+  name: {{ include "0helm.fullname" $ | nindent 4 }}-cassandra-0{{ $i }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      {{- include "0helm-0chain.selectorLabels" $ | nindent 6 }}-cassandra-0{{ $i }}
+      {{- include "0helm.selectorLabels" $ | nindent 6 }}-cassandra-0{{ $i }}
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        {{- include "0helm-0chain.labels" $ | nindent 8 }}-cassandra-0{{ $i }}
+        {{- include "0helm.labels" $ | nindent 8 }}-cassandra-0{{ $i }}
     spec:
       containers:
         - image: {{ $.Values.sharder.cassandraImage.repository }}:{{ $.Values.sharder.cassandraImage.tag }}
