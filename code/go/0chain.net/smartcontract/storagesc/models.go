@@ -740,7 +740,7 @@ List:
 		if b.Terms.ChallengeCompletionTime > sa.MaxChallengeCompletionTime {
 			logging.Logger.Info("allocation_request_in", zap.Any("condition", "b.Terms.ChallengeCompletionTime > sa.MaxChallengeCompletionTime"),
 				zap.Any("b.Terms.ChallengeCompletionTime", b.Terms.ChallengeCompletionTime), zap.Any("sa.MaxChallengeCompletionTime", sa.MaxChallengeCompletionTime))
-			continue
+			//continue
 		}
 		for _, filter := range filters {
 			if filter(b) {
