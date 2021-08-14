@@ -159,6 +159,9 @@ type scConfig struct {
 	MaxCharge float64 `json:"max_charge"`
 
 	BlockReward *blockReward `json:"block_reward"`
+
+	// Allow direct access to MPT
+	ExposeMpt bool `json:"expose_mpt"`
 }
 
 func (sc *scConfig) validate() (err error) {
@@ -448,6 +451,7 @@ func getConfiguredConfig() (conf *scConfig, err error) {
 		scc.GetFloat64(pfx+"block_reward.blobber_capacity_ratio"),
 		scc.GetFloat64(pfx+"block_reward.blobber_usage_ratio"),
 	)
+	conf.ExposeMpt = scc.GetBool(pfx + "expose_mpt")
 
 	err = conf.validate()
 
