@@ -1,12 +1,13 @@
 package storagesc
 
 import (
-	"0chain.net/smartcontract"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"net/url"
+
+	"0chain.net/smartcontract"
 
 	cstate "0chain.net/chaincore/chain/state"
 	"0chain.net/chaincore/state"
@@ -438,9 +439,13 @@ func (ssc *StorageSmartContract) readPoolLock(t *transaction.Transaction,
 	ap.Blobbers = bps
 
 	// add and save
+	clientId := t.ClientID
+	if alloc.Owner != clientId {
+		clientId = alloc.Owner
+	}
 
 	rp.Pools.add(&ap)
-	if err = rp.save(ssc.ID, t.ClientID, balances); err != nil {
+	if err = rp.save(ssc.ID, clientId, balances); err != nil {
 		return "", common.NewError("read_pool_lock_failed", err.Error())
 	}
 
