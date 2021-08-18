@@ -10,8 +10,9 @@ serviceAccount:
 sharder:
   sharderCount: 2
   replicaCount: 1
-  # namespace: helm3
-  # host: helm3.0chain.net
+
+  # namespace: helm
+  # host: 0chain.net
 
   minioConfig:
     bucketUrl: s3.amazonaws.com
@@ -168,8 +169,8 @@ miner:
   minerCount: 3
   replicaCount: 1
 
-  # namespace: helm3
-  # host: helm3.0chain.net
+  # namespace: helm
+  # host: 0chain.net
 
   minerImage:
     repository: 0chaindev/miner
