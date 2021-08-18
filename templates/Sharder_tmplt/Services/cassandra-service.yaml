@@ -7,7 +7,7 @@ kind: Service
 metadata:
   labels:
     {{- include "0helm.labels" $ | nindent 4 }}-cassandra-0{{ $i }}
-  name: {{ include "0helm.fullname" $ | nindent 4 }}-cassandra-0{{ $i }}
+  name: {{ $.Chart.Name }}-cassandra-0{{ $i }}
 spec:
   selector:
     {{- include "0helm.selectorLabels" $ | nindent 6 }}-cassandra-0{{ $i }}

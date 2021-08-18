@@ -7,7 +7,7 @@ kind: Deployment
 metadata:
   labels:
     {{- include "0helm.labels" $ | nindent 6 }}-cassandra-0{{ $i }}
-  name: {{ include "0helm.fullname" $ | nindent 4 }}-cassandra-0{{ $i }}
+  name: {{ $.Chart.Name }}-cassandra-0{{ $i }}
 spec:
   replicas: 1
   selector:

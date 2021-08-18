@@ -7,7 +7,7 @@ kind: Deployment
 metadata:
   labels:
     {{- include "0helm.labels" $ | nindent 6 }}-sharder-0{{ $i }}
-  name: {{ include "0helm.fullname" $ | nindent 4 }}-sharder-0{{ $i }}
+  name: {{ $.Chart.Name }}-sharder-0{{ $i }}
 spec:
   replicas: {{ $.Values.sharder.replicaCount | int }}
   selector:
@@ -44,7 +44,7 @@ spec:
             - mkdir -p /0chain/data/blocks && mkdir -p /0chain/data/rocksdb && ./bin/sharder --deployment_mode 0 --keys_file config/b0snode0{{ $i }}_keys.txt --minio_file config/minio_config.txt
           env:
             - name: CASSANDRA_CLUSTER
-              value: {{ include "0helm.fullname" $ | nindent 15 }}-cassandra-0{{ $i }}
+              value: {{ $.Chart.Name }}-cassandra-0{{ $i }}
             {{- range $key, $value := $.Values.sharder.sharderEnv }}
             - name: {{ $key }}
               value: {{ $value | quote }}

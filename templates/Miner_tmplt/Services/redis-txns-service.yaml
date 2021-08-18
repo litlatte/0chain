@@ -7,7 +7,7 @@ kind: Service
 metadata:
   labels:  
     {{- include "0helm.labels" $ | nindent 6 }}-redis-txns-0{{ $i }}
-  name: {{ include "0helm.fullname" $ | nindent 4 }}-redis-txns-0{{ $i }}
+  name: {{ $.Chart.Name }}-redis-txns-0{{ $i }}
 spec:
   selector:
     {{- include "0helm.selectorLabels" $ | nindent 6 }}-redis-txns-0{{ $i }}

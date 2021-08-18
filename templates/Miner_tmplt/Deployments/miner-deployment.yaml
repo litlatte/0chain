@@ -7,7 +7,7 @@ kind: Deployment
 metadata:
   labels:
     {{- include "0helm.labels" $ | nindent 6 }}-miner-0{{ $i }}
-  name: {{ include "0helm.fullname" $ | nindent 4 }}-miner-0{{ $i }}
+  name: {{ $.Chart.Name }}-miner-0{{ $i }}
 spec:
   replicas: {{ $.Values.miner.replicaCount }}
   selector:
@@ -42,9 +42,9 @@ spec:
             - mkdir -p /0chain/data/rocksdb && mkdir -p /0chain/data/redis/state && mkdir -p /0chain/data/redis/transactions &&  chmod -R 777 /0chain/data/redis && ./bin/miner --deployment_mode 0 --keys_file config/b0mnode0{{ $i }}_keys.txt --dkg_file config/b0mnode0{{ $i }}_dkg.json --delay_file config/n2n_delay.yaml
           env:
             - name: REDIS_HOST
-              value: {{ include "0helm.fullname" $ | nindent 15 }}-redis-0{{ $i }}
+              value: {{ $.Chart.Name }}-redis-0{{ $i }}
             - name: REDIS_TXNS
-              value: {{ include "0helm.fullname" $ | nindent 15 }}-redis-txns-0{{ $i }}
+              value: {{ $.Chart.Name }}-redis-txns-0{{ $i }}
             {{- range $key, $value := $.Values.miner.minerEnv }}
             - name: {{ $key }}
               value: {{ $value | quote }}

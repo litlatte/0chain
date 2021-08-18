@@ -4,7 +4,7 @@ metadata:
   labels:
     {{- include "0helm.labels" $ | nindent 4 }}-minio-config
   creationTimestamp: null
-  name: minio-config-sharder
+  name: minio-config-sharder1
 stringData:
   minio_config.txt: |-
     {{- $.Values.sharder.minioConfig.bucketUrl | nindent 4 }}

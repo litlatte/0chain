@@ -7,7 +7,7 @@ kind: Service
 metadata:
   labels:
     {{- include "0helm.labels" $ | nindent 4 }}-sharder-0{{ $i }}
-  name: {{ include "0helm.fullname" $ | nindent 4 }}-sharder-0{{ $i }}
+  name: {{ $.Chart.Name }}-sharder-0{{ $i }}
 spec:
   ports:
   - name: "{{ $.Values.sharder.sharderService.port }}{{ $i }}"

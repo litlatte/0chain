@@ -10,8 +10,8 @@ serviceAccount:
 sharder:
   sharderCount: 2
   replicaCount: 1
-  namespace: grpc
-  host: grpc.0chain.net
+  # namespace: helm3
+  # host: helm3.0chain.net
 
   minioConfig:
     bucketUrl: s3.amazonaws.com
@@ -23,11 +23,14 @@ sharder:
   zchainConfig:
     view_change: "false"
     magma: "false"
+    minio:
+      enabled: "false"
+      useSsl: "false"
 
   sharderImage:
     repository: 0chaindev/sharder
-    pullPolicy: IfNotPresent
-    tag: test-artem-test-only-188b75a4
+    pullPolicy: Always
+    tag: latest
 
   imagePullSecrets: 
     - name: regcred
@@ -164,18 +167,21 @@ sharder:
 miner:
   minerCount: 3
   replicaCount: 1
-  namespace: grpc
-  host: grpc.0chain.net
+
+  # namespace: helm3
+  # host: helm3.0chain.net
 
   minerImage:
     repository: 0chaindev/miner
     pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
-    tag: test-artem-test-only-188b75a4
+    tag: latest
 
   imagePullSecrets: 
     - name: regcred
+
   nameOverride: ""
+
   fullnameOverride: ""
 
   podAnnotations: {}
