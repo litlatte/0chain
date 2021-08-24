@@ -31,7 +31,4 @@ jobs:
       #     helm uninstall zerochain -n zerochain || true
       - name: Setup chain
         run: |
-          helm upgrade --install zerochain -n helmtest\
-          --set sharder.sharderImage.tag=${{ github.event.inputs.image }} \
-          --set miner.minerImage.tag=${{ github.event.inputs.image }} \
-          zchain/helm
+          helm upgrade --install zerochain -n helmtest --set sharder.sharderImage.tag=${{ github.event.inputs.image }} --set miner.minerImage.tag=${{ github.event.inputs.image }} zchain/helm
