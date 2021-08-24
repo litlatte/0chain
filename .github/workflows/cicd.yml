@@ -20,7 +20,7 @@ jobs:
           version: 'v3.2.2'
       - name: Setup helm repo
         run: |
-          helm repo add zchain http://0chain-helm-chart.s3-website.us-east-2.amazonaws.com/
+          helm repo add zchain http://0chain-helm-chart.s3-website.us-east-2.amazonaws.com/helmCharts/zchain
           helm repo upgrade
       - name: Setup kubeconfig
         run: |
@@ -34,4 +34,4 @@ jobs:
           helm upgrade --install zerochain -n helmtest\
           --set sharder.sharderImage.tag=${{ github.event.inputs.image }} \
           --set miner.minerImage.tag=${{ github.event.inputs.image }} \
-          zchain
+          zchain/helm
