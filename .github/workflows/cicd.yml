@@ -11,6 +11,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-20.04
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v2
       - uses: azure/setup-helm@v1
@@ -24,12 +25,14 @@ jobs:
         run: |
           mkdir -p ~/.kube
           echo "${{ secrets.CICD01KC }}" | base64 -d > ~/.kube/config
+
       - name: Cleanup
         run: |
           helm list --short -n helmtest | xargs -L1 helm delete -n helmtest
-          # cleanup directories
+          # cleanup directories here
 
       - name: Setup chain
+        if: always()
         run: |
           helm upgrade --install --wait --timeout 120s 0chain -n helmtest --set sharder.sharderImage.tag=${{ github.event.inputs.image }} --set miner.minerImage.tag=${{ github.event.inputs.image }} 0chain-helm/zchain
      
