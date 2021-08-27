@@ -3,10 +3,39 @@ name: CICD-01
 on:
   workflow_dispatch:
     inputs:
-      image:
-        description: 'image tag'
+      0chain_image:
+        description: '0chain_image tag'
         required: true
         default: latest
+      blobber_image:
+        description: 'blobber_image tag'
+        required: true
+        default: latest
+      0dns_image:
+        description: '0dns_image tag'
+        required: true
+        default: latest
+      0block_image:
+        description: '0block_image tag'
+        required: true
+        default: latest
+      0box_image:
+        description: '0box_image tag'
+        required: true
+        default: latest
+      0search_image:
+        description: '0search_image tag'
+        required: true
+        default: latest
+      0proxy_image:
+        description: '0proxy_image tag'
+        required: true
+        default: latest
+      explorer_image:
+        description: 'explorer_image tag'
+        required: true
+        default: latest
+
 
 jobs:
   deploy:
@@ -35,21 +64,21 @@ jobs:
       - name: Setup chain
         if: always()
         run: |
-          helm upgrade --install --wait --timeout 120s 0chain -n helmtest --set sharder.sharderImage.tag=${{ github.event.inputs.image }} --set miner.minerImage.tag=${{ github.event.inputs.image }} 0chain-helm/zchain
+          helm upgrade --install --wait --timeout 120s 0chain -n helmtest --set sharder.sharderImage.tag=${{ github.event.inputs.0chain_image }} --set miner.minerImage.tag=${{ github.event.inputs.0chain_image }} 0chain-helm/zchain
      
-          helm upgrade --install --wait --timeout 120s 0dns -n helmtest --set zdns.image.tag=${{ github.event.inputs.image }} --set zdns.host=devnet-0chain.net 0chain-helm/zdns
+          helm upgrade --install --wait --timeout 120s 0dns -n helmtest --set zdns.image.tag=${{ github.event.inputs.0dns_image }} --set zdns.host=devnet-0chain.net 0chain-helm/zdns
 
-          helm upgrade --install --wait --timeout 120s blobber -n helmtest --set blobber.blobberImage.tag=${{ github.event.inputs.image }} --set validator.validatorImage.tag=${{ github.event.inputs.image }} 0chain-helm/blobber
+          helm upgrade --install --wait --timeout 120s blobber -n helmtest --set blobber.blobberImage.tag=${{ github.event.inputs.blobber_image }} --set validator.validatorImage.tag=${{ github.event.inputs.blobber_image }} 0chain-helm/blobber
 
-          helm upgrade --install --wait --timeout 120s 0block -n helmtest --set block.blockImage.tag=${{ github.event.inputs.image }} --set block.host=devnet-0chain.net 0chain-helm/zblock
+          helm upgrade --install --wait --timeout 120s 0block -n helmtest --set block.blockImage.tag=${{ github.event.inputs.0block_image }} --set block.host=devnet-0chain.net 0chain-helm/zblock
 
-          helm upgrade --install --wait --timeout 120s explorer -n helmtest --set explorer.explorerImage.tag=${{ github.event.inputs.image }} --set explorer.host=devnet-0chain.net 0chain-helm/blockExplorer
+          helm upgrade --install --wait --timeout 120s explorer -n helmtest --set explorer.explorerImage.tag=${{ github.event.inputs.explorer_image }} --set explorer.host=devnet-0chain.net 0chain-helm/blockExplorer
 
-          helm upgrade --install --wait --timeout 120s 0proxy -n helmtest --set proxy.image.tag=${{ github.event.inputs.image }} --set proxy.host=devnet-0chain.net 0chain-helm/zproxy
+          helm upgrade --install --wait --timeout 120s 0proxy -n helmtest --set proxy.image.tag=${{ github.event.inputs.0proxy_image }} --set proxy.host=devnet-0chain.net 0chain-helm/zproxy
 
-          helm upgrade --install --wait --timeout 120s 0box -n helmtest --set zbox.zboxImage.tag=${{ github.event.inputs.image }} --set zbox.host=devnet-0chain.net 0chain-helm/zbox
+          helm upgrade --install --wait --timeout 120s 0box -n helmtest --set zbox.zboxImage.tag=${{ github.event.inputs.0box_image }} --set zbox.host=devnet-0chain.net 0chain-helm/zbox
 
-          helm upgrade --install --wait --timeout 120s 0search -n helmtest --set blockRecorder.blockRecorderImage.tag=${{ github.event.inputs.image }} --set blockRecorder.host=devnet-0chain.net 0chain-helm/zsearch
+          helm upgrade --install --wait --timeout 120s 0search -n helmtest --set blockRecorder.blockRecorderImage.tag=${{ github.event.inputs.0search_image }} --set blockRecorder.host=devnet-0chain.net 0chain-helm/zsearch
 
           helm upgrade --install --wait --timeout 120s blobber-stake -n helmtest --set blobberStack.blobberCount=6 --set blobberStack.host=devnet-0chain.net --set blobberStack.image.tag=latest 0chain-helm/blobberStake
 
