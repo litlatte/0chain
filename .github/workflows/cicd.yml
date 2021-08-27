@@ -29,6 +29,7 @@ jobs:
       - name: Cleanup
         run: |
           helm list --short -n helmtest | xargs -L1 helm delete -n helmtest
+          sleep 30
           # cleanup directories here
 
       - name: Setup chain
