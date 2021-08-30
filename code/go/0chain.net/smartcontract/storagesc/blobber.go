@@ -253,10 +253,11 @@ func (sc *StorageSmartContract) updateBlobberSettings(t *transaction.Transaction
 			"blobber's delegate_wallet is not set")
 	}
 
+	/* TODO temporary removing
 	if t.ClientID != sp.Settings.DelegateWallet {
 		return "", common.NewError("update_blobber_settings_failed",
 			"access denied, allowed for delegate_wallet owner only")
-	}
+	}*/
 
 	blobber.Terms = updatedBlobber.Terms
 	blobber.Capacity = updatedBlobber.Capacity
