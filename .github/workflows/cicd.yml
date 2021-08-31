@@ -63,8 +63,8 @@ jobs:
         run: |
           helm list --short -n helmtest | xargs -L1 helm delete -n helmtest
           sleep 30
-          helm upgrade --install --wait --timeout 900s --wait-for-jobs cleanup -n helmtest 0chain-helm/cleanDir
-          # kubectl wait --for=condition=complete job/helm-clean-directory -n helmtest
+          helm upgrade --install --wait --timeout 120s cleanup -n helmtest 0chain-helm/cleanDir
+          kubectl wait --for=condition=complete --timeout 900s job/helm-clean-directory -n helmtest
 
       - name: Setup chain
         if: always()
