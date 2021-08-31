@@ -47,8 +47,8 @@ jobs:
         with:
           version: 'v3.2.2'
       - uses: azure/setup-kubectl@v1
-        with:
-          version: '<version>' # default is latest stable
+        # with:
+        #   version: '<version>' # default is latest stable
         id: install
       - name: Setup helm repo
         run: |
