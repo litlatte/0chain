@@ -1,10 +1,8 @@
 package chain
 
 import (
-	"bytes"
 	"container/ring"
 	"context"
-	"errors"
 	"fmt"
 	"math"
 	"sort"
@@ -169,8 +167,14 @@ type Chain struct {
 	unsubLFBTicket        chan chan *LFBTicket     // }
 	lfbTickerWorkerIsDone chan struct{}            // get rid out of context misuse
 	syncLFBStateC         chan *block.BlockSummary // sync MPT state for latest finalized round
+	syncLFBStateNowC      chan struct{}            // sync latest finalized round state from network immediately
 	// precise DKG phases tracking
 	phaseEvents chan PhaseEvent
+}
+
+// SyncLFBStateNow notify workers to start the LFB state sync immediately.
+func (c *Chain) SyncLFBStateNow() {
+	c.syncLFBStateNowC <- struct{}{}
 }
 
 // SetBCStuckTimeThreshold sets the BC stuck time threshold
@@ -453,6 +457,7 @@ func Provider() datastore.Entity {
 	c.unsubLFBTicket = make(chan chan *LFBTicket, 1)    //
 	c.lfbTickerWorkerIsDone = make(chan struct{})       //
 	c.syncLFBStateC = make(chan *block.BlockSummary)
+	c.syncLFBStateNowC = make(chan struct{})
 
 	c.phaseEvents = make(chan PhaseEvent, 1) // at least 1 for buffer required
 
@@ -584,14 +589,6 @@ func (c *Chain) AddLoadedFinalizedBlocks(lfb, lfmb *block.Block) {
 	return
 }
 
-// AddBlockNoPrevious adds block to cache and never calls
-// async fetch previous block.
-func (c *Chain) AddBlockNoPrevious(b *block.Block) *block.Block {
-	c.blocksMutex.Lock()
-	defer c.blocksMutex.Unlock()
-	return c.addBlockNoPrevious(b)
-}
-
 /*AddBlock - adds a block to the cache */
 func (c *Chain) AddBlock(b *block.Block) *block.Block {
 	c.blocksMutex.Lock()
@@ -652,29 +649,6 @@ func (c *Chain) AddRoundBlock(r round.RoundI, b *block.Block) *block.Block {
 	c.SetRoundRank(r, b)
 	if b.PrevBlock != nil {
 		b.ComputeChainWeight()
-	}
-	return b
-}
-
-func (c *Chain) addBlockNoPrevious(b *block.Block) *block.Block {
-	if eb, ok := c.blocks[b.Hash]; ok {
-		if eb != b {
-			c.MergeVerificationTickets(common.GetRootContext(), eb, b.GetVerificationTickets())
-		}
-		return eb
-	}
-	c.blocks[b.Hash] = b
-	if b.PrevBlock == nil {
-		if pb, ok := c.blocks[b.PrevHash]; ok {
-			b.SetPreviousBlock(pb)
-		}
-	}
-	for pb := b.PrevBlock; pb != nil && pb != c.LatestDeterministicBlock; pb = pb.PrevBlock {
-		pb.AddUniqueBlockExtension(b)
-		if c.IsFinalizedDeterministically(pb) {
-			c.SetLatestDeterministicBlock(pb)
-			break
-		}
 	}
 	return b
 }
@@ -1169,13 +1143,20 @@ func (c *Chain) GetSignatureScheme() encryption.SignatureScheme {
 // CanShardBlocks - is the network able to effectively shard the blocks?
 func (c *Chain) CanShardBlocks(nRound int64) bool {
 	mb := c.GetMagicBlock(nRound)
-	logging.Logger.Debug("CanShareBlocks",
-		zap.Int("active sharders", mb.Sharders.GetActiveCount()),
-		zap.Int("sharders size", mb.Sharders.Size()),
-		zap.Int("min active sharders", c.MinActiveSharders),
-		zap.Int("left", mb.Sharders.GetActiveCount()*100),
-		zap.Int("right", mb.Sharders.Size()*c.MinActiveSharders))
-	return mb.Sharders.GetActiveCount()*100 >= mb.Sharders.Size()*c.MinActiveSharders
+	activeShardersNum := mb.Sharders.GetActiveCount()
+	mbShardersNum := mb.Sharders.Size()
+
+	if activeShardersNum*100 < mbShardersNum*c.MinActiveSharders {
+		logging.Logger.Error("CanShardBlocks - can not shard blocks",
+			zap.Int("active sharders", activeShardersNum),
+			zap.Int("sharders size", mbShardersNum),
+			zap.Int("min active sharders", c.MinActiveSharders),
+			zap.Int("left", activeShardersNum*100),
+			zap.Int("right", mbShardersNum*c.MinActiveSharders))
+		return false
+	}
+
+	return true
 }
 
 // CanShardBlocksSharders - is the network able to effectively shard the blocks?
@@ -1293,6 +1274,10 @@ func (c *Chain) SetLatestFinalizedBlock(b *block.Block) {
 	c.lfbMutex.Lock()
 	c.LatestFinalizedBlock = b
 	if b != nil {
+		logging.Logger.Debug("set lfb",
+			zap.Int64("round", b.Round),
+			zap.String("block", b.Hash),
+			zap.Bool("state_computed", b.IsStateComputed()))
 		bs := b.GetSummary()
 		c.lfbSummary = bs
 		c.BroadcastLFBTicket(common.GetRootContext(), b)
@@ -1320,19 +1305,6 @@ func (c *Chain) GetLatestFinalizedBlock() *block.Block {
 	c.lfbMutex.RLock()
 	defer c.lfbMutex.RUnlock()
 	return c.LatestFinalizedBlock
-}
-
-// UpdateLatestFinalizedBlockState updates the latest finalized block's state
-func (c *Chain) UpdateLatestFinalizedBlockState(state util.MerklePatriciaTrieI) error {
-	c.lfbMutex.Lock()
-	defer c.lfbMutex.Unlock()
-	if bytes.Compare(c.LatestFinalizedBlock.ClientStateHash, state.GetRoot()) != 0 {
-		return errors.New("latest finalized block state hash mismatch")
-	}
-
-	c.LatestFinalizedBlock.CreateState(state.GetNodeDB(), state.GetRoot())
-	c.LatestFinalizedBlock.SetStateStatus(block.StateSuccessful)
-	return nil
 }
 
 // GetLatestFinalizedBlockSummary - get the latest finalized block summary.
@@ -1601,6 +1573,86 @@ func (c *Chain) notifyToSyncFinalizedRoundState(bs *block.BlockSummary) {
 	case <-time.NewTimer(notifySyncLFRStateTimeout).C:
 		logging.Logger.Error("Send sync state for finalized round timeout")
 	}
+}
+
+// UpdateBlock updates block
+func (c *Chain) UpdateBlocks(bs []*block.Block) {
+	for i := range bs {
+		r := c.GetRound(bs[i].Round)
+		if r != nil {
+			r.UpdateNotarizedBlock(bs[i])
+		}
+	}
+	c.blocksMutex.Lock()
+	defer c.blocksMutex.Unlock()
+	for i := range bs {
+		c.blocks[bs[i].Hash] = bs[i]
+	}
+}
+
+func (c *Chain) pullNotarizedBlocks(ctx context.Context, b *block.Block, num int64) []*block.Block {
+	blocks := make([]*block.Block, 0, num)
+	cb := b
+	// get one more blocks from network in case the last block does not have previous block in local
+	for i := int64(0); i < num+1; i++ {
+		nb := c.GetNotarizedBlock(ctx, cb.PrevHash, cb.Round-1)
+		if nb == nil {
+			logging.Logger.Error("pull_notarized_block - could not get notarized block",
+				zap.Int64("b_round", b.Round),
+				zap.Int64("round", b.Round-1-i),
+				zap.Int64("current_round", c.GetCurrentRound()),
+				zap.Int64("index", i))
+			break
+		}
+		nb = nb.Clone()
+
+		logging.Logger.Debug("pull_notarized_block - got notarized block",
+			zap.Int64("round", nb.Round),
+			zap.String("block", nb.Hash),
+			zap.Int64("index", i))
+
+		// link blocks
+		if cb != b {
+			cb.SetPreviousBlock(nb)
+		}
+
+		cb = nb
+
+		blocks = append(blocks, nb)
+
+		// check if previous block does exist locally
+		pb, _ := c.GetBlock(ctx, cb.PrevHash)
+		if pb != nil {
+			cb.SetPreviousBlock(pb)
+			if pb.IsStateComputed() {
+				break
+			}
+		}
+	}
+
+	// set the last block's previous block
+	if len(blocks) == int(num+1) {
+		blocks = blocks[:num]
+	}
+
+	if len(blocks) > 0 {
+		// reverse blocks
+		for i, j := 0, len(blocks)-1; i < j; i, j = i+1, j-1 {
+			blocks[i], blocks[j] = blocks[j], blocks[i]
+		}
+
+		if blocks[0] == nil {
+			panic(fmt.Sprintf("last is nil, len(blocks)=%d, num: %v, blocks: %v", len(blocks), num, blocks))
+		}
+
+		if blocks[0].Round > 0 && blocks[0].PrevBlock == nil {
+			logging.Logger.Panic("pull_notarized_block - last block has no previous block",
+				zap.Int64("b_round", b.Round),
+				zap.Int64("round", blocks[0].Round))
+		}
+	}
+
+	return blocks
 }
 
 // The ViewChanger represents node makes view change where a block with new
