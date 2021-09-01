@@ -16,7 +16,7 @@ import (
 )
 
 //DebugMPTNode - for detailed debugging
-var DebugMPTNode = false
+var DebugMPTNode = true
 
 /*MerklePatriciaTrie - it's a merkle tree and a patricia trie */
 type MerklePatriciaTrie struct {
