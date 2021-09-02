@@ -50,10 +50,10 @@ func (mc *Chain) SendVRFShare(ctx context.Context, vrfs *round.VRFShare) {
 	}
 
 	if len(good) > 0 {
-		mb.Miners.SendToMultipleNodes(RoundVRFSender(vrfs), good)
+		mb.Miners.SendToMultipleNodes(ctx, RoundVRFSender(vrfs), good)
 	}
 	if len(bad) > 0 {
-		mb.Miners.SendToMultipleNodes(RoundVRFSender(badVRFS), bad)
+		mb.Miners.SendToMultipleNodes(ctx, RoundVRFSender(badVRFS), bad)
 	}
 }
 
@@ -152,9 +152,9 @@ func (mc *Chain) SendVerificationTicket(ctx context.Context, b *block.Block,
 	}
 
 	if len(good) > 0 {
-		mb.Miners.SendToMultipleNodes(VerificationTicketSender(bvt), good)
+		mb.Miners.SendToMultipleNodes(ctx, VerificationTicketSender(bvt), good)
 	}
 	if len(bad) > 0 {
-		mb.Miners.SendToMultipleNodes(VerificationTicketSender(badvt), bad)
+		mb.Miners.SendToMultipleNodes(ctx, VerificationTicketSender(badvt), bad)
 	}
 }
