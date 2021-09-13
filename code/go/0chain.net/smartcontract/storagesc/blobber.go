@@ -72,8 +72,12 @@ func updateBlobberInList(list []*StorageNode, update *StorageNode) (ok bool) {
 }
 
 // update existing blobber, or reborn a deleted one
-func (sc *StorageSmartContract) updateBlobber(t *transaction.Transaction,
-	conf *scConfig, blobber *StorageNode, blobbers *StorageNodes,
+func (sc *StorageSmartContract) updateBlobber(
+	t *transaction.Transaction,
+	conf *scConfig,
+	blobber *StorageNode,
+	blobbers *StorageNodes,
+	sp *stakePool,
 	balances cstate.StateContextI,
 ) (err error) {
 	// check terms
@@ -110,11 +114,6 @@ func (sc *StorageSmartContract) updateBlobber(t *transaction.Transaction,
 	}
 
 	// update stake pool settings
-	var sp *stakePool
-	if sp, err = sc.getStakePool(blobber.ID, balances); err != nil {
-		return fmt.Errorf("can't get stake pool:  %v", err)
-	}
-
 	if err = blobber.StakePoolSettings.validate(conf); err != nil {
 		return fmt.Errorf("invalid new stake pool settings:  %v", err)
 	}
@@ -261,7 +260,7 @@ func (sc *StorageSmartContract) updateBlobberSettings(t *transaction.Transaction
 	blobber.Terms = updatedBlobber.Terms
 	blobber.Capacity = updatedBlobber.Capacity
 
-	if err = sc.updateBlobber(t, conf, blobber, blobbers, balances); err != nil {
+	if err = sc.updateBlobber(t, conf, blobber, blobbers, sp, balances); err != nil {
 		return "", common.NewError("update_blobber_settings_failed", err.Error())
 	}
 
@@ -277,6 +276,12 @@ func (sc *StorageSmartContract) updateBlobberSettings(t *transaction.Transaction
 	if err != nil {
 		return "", common.NewError("update_blobber_settings_failed",
 			"saving blobber: "+err.Error())
+	}
+
+	if sp.stake() >= conf.BlockReward.QualifyingStake {
+		if err := updateBlockRewardTotals(updatedBlobber.Capacity-blobber.Capacity, 0, balances); err != nil {
+			return "", err
+		}
 	}
 
 	return string(blobber.Encode()), nil

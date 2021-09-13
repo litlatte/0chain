@@ -19,7 +19,13 @@ func (sc *StorageSmartContract) insertBlobber(t *transaction.Transaction,
 	// check for duplicates
 	for _, b := range blobbers.Nodes {
 		if b.ID == blobber.ID || b.BaseURL == blobber.BaseURL {
-			return sc.updateBlobber(t, conf, blobber, blobbers, balances)
+			var sp *stakePool
+			sp, err = sc.getOrCreateStakePool(conf, blobber.ID,
+				&blobber.StakePoolSettings, balances)
+			if err != nil {
+				return
+			}
+			return sc.updateBlobber(t, conf, blobber, blobbers, sp, balances)
 		}
 	}
 

@@ -1,86 +1,145 @@
 package storagesc
 
 import (
+	"encoding/json"
+	"fmt"
+
 	cstate "0chain.net/chaincore/chain/state"
-	"0chain.net/chaincore/state"
 	"0chain.net/core/common"
+	"0chain.net/core/datastore"
+	"0chain.net/core/encryption"
+	"0chain.net/core/util"
 )
 
-func (ssc *StorageSmartContract) payBlobberBlockRewards(
-	balances cstate.StateContextI,
-) (err error) {
-	var conf *scConfig
-	if conf, err = ssc.getConfig(balances, true); err != nil {
-		return common.NewError("blobber_block_rewards_failed",
-			"cannot get smart contract configurations: "+err.Error())
-	}
+var (
+	QualifyingTotalsKey         = datastore.Key(ADDRESS + encryption.Hash("qualifying_totals"))
+	QualifyingTotalsPerBlockKey = datastore.Key(ADDRESS + encryption.Hash("qualifying_totals_per_block"))
+)
 
-	if conf.BlockReward.BlobberCapacityWeight+conf.BlockReward.BlobberUsageWeight == 0 ||
-		conf.BlockReward.BlockReward == 0 {
-		return nil
-	}
+type qualifyingTotals struct {
+	capacity, used int64
+}
 
-	allBlobbers, err := ssc.getBlobbersList(balances)
+func (qt *qualifyingTotals) Encode() []byte {
+	var b, err = json.Marshal(qt)
 	if err != nil {
-		return common.NewError("blobber_block_rewards_failed",
-			"cannot get all blobbers list: "+err.Error())
+		panic(err)
 	}
+	return b
+}
 
-	// filter out blobbers with stake too low to qualify for rewards
-	var qualifyingBlobberIds []string
-	var stakePools []*stakePool
-	var stakeTotals []float64
-	var totalQStake float64
-	for _, blobber := range allBlobbers.Nodes {
-		var sp *stakePool
-		if sp, err = ssc.getStakePool(blobber.ID, balances); err != nil {
-			return common.NewError("blobber_block_rewards_failed",
-				"can't get related stake pool: "+err.Error())
-		}
-		var stake float64
-		for _, delegate := range sp.Pools {
-			stake += float64(delegate.Balance)
-		}
-		if state.Balance(stake) >= conf.BlockReward.QualifyingStake {
-			qualifyingBlobberIds = append(qualifyingBlobberIds, blobber.ID)
-			stakePools = append(stakePools, sp)
-			stakeTotals = append(stakeTotals, stake)
-			totalQStake += stake
-		}
-	}
+func (qt *qualifyingTotals) Decode(p []byte) error {
+	return json.Unmarshal(p, qt)
+}
 
-	for i, qsp := range stakePools {
-		var ratio float64
-		if totalQStake > 0 {
-			ratio = stakeTotals[i] / totalQStake
-		} else {
-			ratio = 1.0 / float64(len(stakePools))
-		}
-
-		capacityReward := float64(conf.BlockReward.BlockReward) * conf.BlockReward.BlobberCapacityWeight * ratio
-		if err := mintReward(qsp, capacityReward, balances); err != nil {
-			return common.NewError("blobber_block_rewards_failed", "minting capacity reward"+err.Error())
-		}
-		usageReward := float64(conf.BlockReward.BlockReward) * conf.BlockReward.BlobberUsageWeight * ratio
-		if err := mintReward(qsp, usageReward, balances); err != nil {
-			return common.NewError("blobber_block_rewards_failed", "minting usage reward"+err.Error())
-		}
-		qsp.Rewards.Blobber += state.Balance(capacityReward + usageReward)
-	}
-
-	for i, qsp := range stakePools {
-		if err = qsp.save(ssc.ID, qualifyingBlobberIds[i], balances); err != nil {
-			return common.NewError("blobber_block_rewards_failed",
-				"saving stake pool: "+err.Error())
-		}
-	}
-
-	// save configuration (minted tokens)
-	_, err = balances.InsertTrieNode(scConfigKey(ssc.ID), conf)
+func getQualifyingTotals(balances cstate.StateContextI) (*qualifyingTotals, error) {
+	var val util.Serializable
+	val, err := balances.GetTrieNode(QualifyingTotalsKey)
 	if err != nil {
-		return common.NewError("blobber_block_rewards_failed",
-			"saving configurations: "+err.Error())
+		return nil, err
 	}
 
+	qt := new(qualifyingTotals)
+	err = qt.Decode(val.Encode())
+	if err != nil {
+		return nil, fmt.Errorf("%w: %s", common.ErrDecoding, err)
+	}
+	return qt, nil
+}
+
+func (qt *qualifyingTotals) save(balances cstate.StateContextI) error {
+	_, err := balances.InsertTrieNode(QualifyingTotalsKey, qt)
+	return err
+}
+
+type qualifyingTotalsList map[int64]qualifyingTotals
+
+func (qt *qualifyingTotalsList) Encode() []byte {
+	var b, err = json.Marshal(qt)
+	if err != nil {
+		panic(err)
+	}
+	return b
+}
+
+func (qt *qualifyingTotalsList) Decode(p []byte) error {
+	return json.Unmarshal(p, qt)
+}
+
+func (qt *qualifyingTotalsList) save(balances cstate.StateContextI) error {
+	_, err := balances.InsertTrieNode(QualifyingTotalsPerBlockKey, qt)
+	return err
+}
+
+func getQualifyingTotalsList(balances cstate.StateContextI) (*qualifyingTotalsList, error) {
+	var val util.Serializable
+	val, err := balances.GetTrieNode(QualifyingTotalsPerBlockKey)
+	if err != nil {
+		return nil, err
+	}
+
+	qt := new(qualifyingTotalsList)
+	err = qt.Decode(val.Encode())
+	if err != nil {
+		return nil, fmt.Errorf("%w: %s", common.ErrDecoding, err)
+	}
+	return qt, nil
+}
+
+// Change capacity
+// updateBlobberSettings
+// addBlobber
+//
+// Usage
+// addBlobbersOffers / newAllocationRequest
+// reduceAllocation / updateAllocation
+// extendAllocation / updateAllocation
+// finishAllocation / CancelAllocation adn FinaliseAllocation
+// updateBlobber
+
+func UpdateRewardTotals(roundNumber int64, balances cstate.StateContextI) error {
+	qt, err := getQualifyingTotals(balances)
+	if err != nil {
+		if err != util.ErrValueNotPresent {
+			return err
+		}
+		qt = new(qualifyingTotals)
+	}
+	var qtl *qualifyingTotalsList
+	qtl, err = getQualifyingTotalsList(balances)
+	if err != nil {
+		if err != util.ErrValueNotPresent {
+			return err
+		}
+		*qtl = qualifyingTotalsList(make(map[int64]qualifyingTotals))
+	}
+	(*qtl)[roundNumber] = *qt
+	return nil
+}
+
+func updateBlockRewardTotals(deltaCapacity, deltaUsed int64, balances cstate.StateContextI) error {
+	qt, err := getQualifyingTotals(balances)
+	if err != nil {
+		if err != util.ErrValueNotPresent {
+			return err
+		}
+		if deltaCapacity < 0 {
+			return fmt.Errorf("data currption, cannot reduce by negative %d zero capacity", deltaCapacity)
+		}
+		if deltaUsed < 0 {
+			return fmt.Errorf("data currption, cannot reduce by negative %d zero used", deltaUsed)
+		}
+		qt = new(qualifyingTotals)
+	}
+	qt.capacity += deltaCapacity
+	if qt.capacity < 0 {
+		return fmt.Errorf("data curruption, cannot reduce capacity bellow zero. delta %d, existing capacity %d",
+			deltaCapacity, qt.capacity)
+	}
+	qt.used += deltaUsed
+	if qt.used < 0 {
+		return fmt.Errorf("data curruption, cannot reduce used bellow zero. delta %d, existing used %d",
+			deltaUsed, qt.used)
+	}
 	return nil
 }
