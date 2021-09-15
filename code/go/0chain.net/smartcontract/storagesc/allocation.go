@@ -222,9 +222,15 @@ func (sc *StorageSmartContract) addBlobbersOffers(
 		sp.addOffer(sa, sa.BlobberDetails[i])
 
 		if sp.stake() >= conf.BlockReward.QualifyingStake {
-			if err := updateBlockRewardTotals(0, sa.BlobberDetails[i].Size, balances); err != nil {
-				return err
-			}
+			balances.UpdateBlockRewardTotals(0, sa.BlobberDetails[i].Size)
+
+		}
+		qtl, err := getQualifyingTotalsList(balances)
+		if err != nil {
+			return fmt.Errorf("getting block reward totals: %v", err)
+		}
+		if err := qtl.payBlobberRewards(b, sp, conf, balances); err != nil {
+			return fmt.Errorf("paying blobber rewards: %v", err)
 		}
 
 		// save blobber

@@ -43,6 +43,8 @@ type StateContextI interface {
 	AddTransfer(t *state.Transfer) error
 	AddSignedTransfer(st *state.SignedTransfer)
 	AddMint(m *state.Mint) error
+	UpdateBlockRewardTotals(deltaCapacity, deltaUsed int64)
+	GetBlockRewardDeltas() (int64, int64)
 	GetTransfers() []*state.Transfer
 	GetSignedTransfers() []*state.SignedTransfer
 	GetMints() []*state.Mint
@@ -60,6 +62,7 @@ type StateContext struct {
 	signedTransfers               []*state.SignedTransfer
 	mints                         []*state.Mint
 	clientStateDeserializer       state.DeserializerI
+	deltaCapacity, deltaUsage     int64
 	getSharders                   func(*block.Block) []string
 	getLastestFinalizedMagicBlock func() *block.Block
 	getChainCurrentMagicBlock     func() *block.MagicBlock
@@ -131,6 +134,15 @@ func (sc *StateContext) AddMint(m *state.Mint) error {
 	}
 	sc.mints = append(sc.mints, m)
 	return nil
+}
+
+func (sc *StateContext) UpdateBlockRewardTotals(deltaCapacity, deltaUsed int64) {
+	sc.deltaCapacity += deltaCapacity
+	sc.deltaUsage += deltaUsed
+}
+
+func (sc *StateContext) GetBlockRewardDeltas() (int64, int64) {
+	return sc.deltaCapacity, sc.deltaUsage
 }
 
 func (sc *StateContext) isApprovedMinter(m *state.Mint) bool {

@@ -123,6 +123,17 @@ func (sc *StorageSmartContract) updateBlobber(
 	sp.Settings.ServiceCharge = blobber.StakePoolSettings.ServiceCharge
 	sp.Settings.NumDelegates = blobber.StakePoolSettings.NumDelegates
 
+	if sp.stake() >= conf.BlockReward.QualifyingStake {
+		balances.UpdateBlockRewardTotals(blobber.Capacity-blobber.Capacity, 0)
+	}
+	qtl, err := getQualifyingTotalsList(balances)
+	if err != nil {
+		return fmt.Errorf("getting block reward totals: %v", err)
+	}
+	if err := qtl.payBlobberRewards(blobber, sp, conf, balances); err != nil {
+		return fmt.Errorf("paying blobber rewards: %v", err)
+	}
+
 	// save stake pool
 	if err = sp.save(sc.ID, blobber.ID, balances); err != nil {
 		return fmt.Errorf("saving stake pool: %v", err)
@@ -278,12 +289,6 @@ func (sc *StorageSmartContract) updateBlobberSettings(t *transaction.Transaction
 			"saving blobber: "+err.Error())
 	}
 
-	if sp.stake() >= conf.BlockReward.QualifyingStake {
-		if err := updateBlockRewardTotals(updatedBlobber.Capacity-blobber.Capacity, 0, balances); err != nil {
-			return "", err
-		}
-	}
-
 	return string(blobber.Encode()), nil
 }
 
@@ -369,7 +374,7 @@ func (sc *StorageSmartContract) commitBlobberRead(t *transaction.Transaction,
 		lastKnownCtr = lastCommittedRM.ReadMarker.ReadCounter
 	}
 
-	err = commitRead.ReadMarker.Verify(lastCommittedRM.ReadMarker)
+	err = commitRead.ReadMarker.Verify(lastCommittedRM.ReadMarker, balances)
 	if err != nil {
 		return "", common.NewErrorf("commit_blobber_read",
 			"can't verify read marker: %v", err)
@@ -591,7 +596,7 @@ func (sc *StorageSmartContract) commitBlobberConnection(
 
 	detailsBytes, err := json.Marshal(details)
 
-	if !commitConnection.WriteMarker.VerifySignature(alloc.OwnerPublicKey) {
+	if !commitConnection.WriteMarker.VerifySignature(alloc.OwnerPublicKey, balances) {
 		return "", common.NewError("commit_connection_failed",
 			"Invalid signature for write marker")
 	}

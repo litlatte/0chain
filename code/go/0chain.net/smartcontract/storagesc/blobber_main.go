@@ -48,9 +48,14 @@ func (sc *StorageSmartContract) insertBlobber(t *transaction.Transaction,
 	}
 
 	if sp.stake() >= conf.BlockReward.QualifyingStake {
-		if err := updateBlockRewardTotals(blobber.Capacity, 0, balances); err != nil {
-			return err
-		}
+		balances.UpdateBlockRewardTotals(blobber.Capacity, 0)
+	}
+	qtl, err := getQualifyingTotalsList(balances)
+	if err != nil {
+		return fmt.Errorf("getting block reward totals: %v", err)
+	}
+	if err := qtl.payBlobberRewards(blobber, sp, conf, balances); err != nil {
+		return fmt.Errorf("paying blobber rewards: %v", err)
 	}
 
 	// update the list
