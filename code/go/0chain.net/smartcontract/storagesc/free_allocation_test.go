@@ -7,15 +7,13 @@ import (
 	"testing"
 	"time"
 
-	"0chain.net/core/encryption"
-
-	"0chain.net/chaincore/chain"
 	cstate "0chain.net/chaincore/chain/state"
 	"0chain.net/chaincore/mocks"
 	sci "0chain.net/chaincore/smartcontractinterface"
 	"0chain.net/chaincore/state"
 	"0chain.net/chaincore/transaction"
 	"0chain.net/core/common"
+	"0chain.net/core/encryption"
 	"0chain.net/core/util"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -883,7 +881,7 @@ func signFreeAllocationMarker(t *testing.T, frm freeStorageMarker) (string, stri
 	}
 	responseBytes, err := json.Marshal(&request)
 	require.NoError(t, err)
-	signatureScheme := chain.GetServerChain().GetSignatureScheme()
+	signatureScheme := encryption.NewBLS0ChainScheme()
 	err = signatureScheme.GenerateKeys()
 	require.NoError(t, err)
 	signature, err := signatureScheme.Sign(hex.EncodeToString(responseBytes))
