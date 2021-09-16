@@ -360,19 +360,19 @@ func (c *Chain) updateBlockRewardTotals(sctx bcstate.StateContextI) error {
 	ts, err := c.getState(clientState, toClient)
 	if !isValid(err) {
 		if state.DebugTxn() {
-			logging.Logger.Error("transfer amount - to_client get", zap.Int64("round", b.Round), zap.String("block", b.Hash), zap.String("prev_block", b.PrevHash), zap.Any("txn", datastore.ToJSON(txn)), zap.Error(err))
+			logging.Logger.Error("transfer amount - to_client get", zap.Int64("round", b.Round), zap.String("block", b.Hash), zap.String("prev_block", b.PrevHash), zap.Error(err))
 			for _, txn := range b.Txns {
 				if txn == nil {
 					break
 				}
 				fmt.Fprintf(block.StateOut, "transfer amount r=%v b=%v t=%+v\n", b.Round, b.Hash, txn)
 			}
-			fmt.Fprintf(block.StateOut, "transfer amount - error getting state value: %v %+v %v\n", toClient, txn, err)
+			fmt.Fprintf(block.StateOut, "transfer amount - error getting state value: %v %+v %v\n", toClient, err)
 			block.PrintStates(clientState, b.ClientState)
 			logging.Logger.DPanic(fmt.Sprintf("transfer amount - error getting state value: %v %v", toClient, err))
 		}
 		if state.Debug() {
-			logging.Logger.Error("transfer amount - error", zap.Int64("round", b.Round), zap.String("block", b.Hash), zap.Any("txn", txn), zap.Error(err))
+			logging.Logger.Error("transfer amount - error", zap.Int64("round", b.Round), zap.String("block", b.Hash), zap.Error(err))
 		}
 		return err
 	}
@@ -382,20 +382,20 @@ func (c *Chain) updateBlockRewardTotals(sctx bcstate.StateContextI) error {
 	if err != nil {
 		if state.DebugTxn() {
 			if config.DevConfiguration.State {
-				logging.Logger.Error("transfer amount - to_client get", zap.Int64("round", b.Round), zap.String("block", b.Hash), zap.String("prev_block", b.PrevHash), zap.Any("txn", datastore.ToJSON(txn)), zap.Error(err))
+				logging.Logger.Error("transfer amount - to_client get", zap.Int64("round", b.Round), zap.String("block", b.Hash), zap.String("prev_block", b.PrevHash), zap.Error(err))
 				for _, txn := range b.Txns {
 					if txn == nil {
 						break
 					}
 					fmt.Fprintf(block.StateOut, "transfer amount r=%v b=%v t=%+v\n", b.Round, b.Hash, txn)
 				}
-				fmt.Fprintf(block.StateOut, "transfer amount - error getting state value: %v %+v %v\n", toClient, txn, err)
+				fmt.Fprintf(block.StateOut, "transfer amount - error getting state value: %v %+v %v\n", toClient, err)
 				block.PrintStates(clientState, b.ClientState)
-				logging.Logger.DPanic("transfer amount - error", zap.Int64("round", b.Round), zap.String("block", b.Hash), zap.Any("txn", txn), zap.Error(err))
+				logging.Logger.DPanic("transfer amount - error", zap.Int64("round", b.Round), zap.String("block", b.Hash), zap.Error(err))
 			}
 		}
 		if state.Debug() {
-			logging.Logger.Error("transfer amount - error", zap.Int64("round", b.Round), zap.String("block", b.Hash), zap.Any("txn", txn), zap.Error(err))
+			logging.Logger.Error("transfer amount - error", zap.Int64("round", b.Round), zap.String("block", b.Hash), zap.Error(err))
 		}
 		return err
 	}

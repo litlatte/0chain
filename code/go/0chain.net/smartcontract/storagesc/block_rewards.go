@@ -63,7 +63,7 @@ func (qtl *qualifyingTotalsList) payBlobberRewards(
 	if stakes == 0 {
 		return nil
 	}
-	numRounds := int(balances.GetBlock().Round - blobber.LastBlockRewardPayment)
+	numRounds := int(balances.GetBlock().Round - blobber.LastBlockRewardPaymentRound)
 	if numRounds > len(*qtl) {
 		numRounds = len(*qtl) - 1
 	}
