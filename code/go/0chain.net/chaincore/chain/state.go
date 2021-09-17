@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"0chain.net/smartcontract/storagesc"
-
 	"errors"
 
 	"0chain.net/chaincore/block"
@@ -377,7 +375,7 @@ func (c *Chain) updateBlockRewardTotals(sctx bcstate.StateContextI) error {
 		return err
 	}
 	sctx.SetStateContext(ts)
-	storagesc.UpdateRewardTotalList(sctx)
+	updateRewardTotalList(sctx)
 	_, err = clientState.Insert(util.Path(toClient), ts)
 	if err != nil {
 		if state.DebugTxn() {

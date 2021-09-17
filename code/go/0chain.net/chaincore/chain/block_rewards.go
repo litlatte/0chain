@@ -1,4 +1,4 @@
-package storagesc
+package chain
 
 import (
 	"encoding/json"
@@ -14,9 +14,18 @@ import (
 )
 
 var (
-	QualifyingTotalsKey         = datastore.Key(ADDRESS + encryption.Hash("qualifying_totals"))
-	QualifyingTotalsPerBlockKey = datastore.Key(ADDRESS + encryption.Hash("qualifying_totals_per_block"))
+	QualifyingTotalsKey         = datastore.Key("6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7" + encryption.Hash("qualifying_totals"))
+	QualifyingTotalsPerBlockKey = datastore.Key("6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7" + encryption.Hash("qualifying_totals_per_block"))
 )
+
+type blockReward struct {
+	BlockReward           state.Balance `json:"block_reward"`
+	QualifyingStake       state.Balance `json:"qualifying_stake"`
+	SharderWeight         float64       `json:"sharder_weight"`
+	MinerWeight           float64       `json:"miner_weight"`
+	BlobberCapacityWeight float64       `json:"blobber_capacity_weight"`
+	BlobberUsageWeight    float64       `json:"blobber_usage_weight"`
+}
 
 type qualifyingTotals struct {
 	Capacity       int64        `json:"capacity"`
@@ -51,62 +60,6 @@ func getQualifyingTotals(balances cstate.StateContextI) (*qualifyingTotals, erro
 	return qt, nil
 }
 
-func (qtl *qualifyingTotalsList) payBlobberRewards(
-	blobber *StorageNode,
-	sp *stakePool,
-	conf *scConfig,
-	balances cstate.StateContextI,
-) error {
-	if len(*qtl) == 0 {
-		return nil
-	}
-	var stakes = float64(sp.stake())
-	if stakes == 0 {
-		return nil
-	}
-	numRounds := int(balances.GetBlock().Round - blobber.LastBlockRewardPaymentRound)
-	if numRounds > len(*qtl) {
-		numRounds = len(*qtl) - 1
-	}
-	var settings blockReward = *conf.BlockReward
-	var reward = blobber.BlockRewardCarry
-	for i := 0; i < numRounds; i++ {
-		index := len(*qtl) - i
-		if (*qtl)[index].SettingsChange != nil {
-			settings = *(*qtl)[index].SettingsChange
-		}
-
-		var capRatio float64
-		if (*qtl)[index].Capacity > 0 {
-			capRatio = float64(blobber.Capacity) / float64((*qtl)[index].Capacity)
-		}
-		capacityReward := float64(settings.BlockReward) * settings.BlobberCapacityWeight * capRatio
-
-		var usedRatio float64
-		if (*qtl)[index].Used > 0 {
-			usedRatio = float64(blobber.Used) / float64((*qtl)[index].Used)
-		}
-		usedReward := float64(settings.BlockReward) * settings.BlobberUsageWeight * usedRatio
-
-		reward += capacityReward + usedReward
-	}
-
-	var totalRewardUsed state.Balance
-	for _, pool := range sp.Pools {
-		poolReward := state.Balance(reward * float64(pool.Balance) / stakes)
-		if err := balances.AddMint(state.NewMint(ADDRESS, pool.DelegateID, poolReward)); err != nil {
-			return fmt.Errorf(
-				"error miniting block reward, mint: %v\terr: %v",
-				state.NewMint(ADDRESS, pool.DelegateID, poolReward), err,
-			)
-		}
-		totalRewardUsed += poolReward
-	}
-	blobber.BlockRewardCarry = reward - float64(totalRewardUsed)
-
-	return nil
-}
-
 type qualifyingTotalsList []qualifyingTotals
 
 func newQualifyingTotalsList() qualifyingTotalsList {
@@ -123,6 +76,26 @@ func (qtl *qualifyingTotalsList) Encode() []byte {
 
 func (qtl *qualifyingTotalsList) Decode(p []byte) error {
 	return json.Unmarshal(p, qtl)
+}
+
+func updateRewardTotalList(balances cstate.StateContextI) error {
+	qt, err := getQualifyingTotals(balances)
+	if err != nil {
+		if err != util.ErrValueNotPresent {
+			return err
+		}
+		qt = new(qualifyingTotals)
+	}
+	var qtl qualifyingTotalsList
+	qtl, err = getQualifyingTotalsList(balances)
+	if err != nil {
+		return err
+	}
+	qtl[balances.GetBlock().Round] = *qt
+	if err := qtl.save(balances); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (qtl *qualifyingTotalsList) save(balances cstate.StateContextI) error {
