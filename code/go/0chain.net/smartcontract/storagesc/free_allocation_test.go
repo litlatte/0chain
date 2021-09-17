@@ -151,7 +151,7 @@ func TestAddFreeStorageAssigner(t *testing.T) {
 			t.Parallel()
 			args := setExpectations(t, test.name, test.parameters, test.want)
 
-			err := args.ssc.addFreeStorageAssigner(args.txn, args.input, args.balances)
+			_, err := args.ssc.addFreeStorageAssigner(args.txn, args.input, args.balances)
 
 			require.EqualValues(t, test.want.err, err != nil)
 			if err != nil {

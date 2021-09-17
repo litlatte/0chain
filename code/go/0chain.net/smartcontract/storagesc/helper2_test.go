@@ -19,6 +19,12 @@ type mockStateContext struct {
 	store         map[datastore.Key]util.Serializable
 }
 
+func (sc *mockStateContext) GetBlockRewardDeltas() (int64, int64) {
+	return 0, 0
+}
+
+func (sc *mockStateContext) UpdateBlockRewardTotals(_, _ int64) {}
+
 type mockBlobberYaml struct {
 	serviceCharge           float64
 	readPrice               float64
