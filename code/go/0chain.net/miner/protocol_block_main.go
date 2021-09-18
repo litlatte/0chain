@@ -134,6 +134,15 @@ func (mc *Chain) GenerateBlock(ctx context.Context, b *block.Block,
 		}
 		if txnProcessor(ctx, txn) {
 			if idx >= mc.BlockSize || byteSize >= mc.MaxByteSize {
+				logging.Logger.Error("generate block (too big block size)",
+					zap.Bool("idx >= block size", idx >= mc.BlockSize),
+					zap.Bool("byteSize >= mc.NMaxByteSize", byteSize >= mc.MaxByteSize),
+					zap.Int32("idx", idx),
+					zap.Int32("block size", mc.BlockSize),
+					zap.Int64("byte size", byteSize),
+					zap.Int64("max byte size", mc.MaxByteSize),
+					zap.Int32("count", count),
+					zap.Int("txns", len(b.Txns)))
 				return false
 			}
 		}
@@ -235,7 +244,10 @@ func (mc *Chain) GenerateBlock(ctx context.Context, b *block.Block,
 		return common.NewError("get_clients_error", err.Error())
 	}
 
-	logging.Logger.Debug("generate block (assemble)", zap.Int64("round", b.Round), zap.Duration("time", time.Since(start)))
+	logging.Logger.Debug("generate block (assemble)",
+		zap.Int64("round", b.Round),
+		zap.Int("txns", len(b.Txns)),
+		zap.Duration("time", time.Since(start)))
 
 	bsh.UpdatePendingBlock(ctx, b, etxns)
 	for _, txn := range b.Txns {
@@ -253,7 +265,10 @@ func (mc *Chain) GenerateBlock(ctx context.Context, b *block.Block,
 	}
 	b.ClientStateHash = b.ClientState.GetRoot()
 	bgTimer.UpdateSince(start)
-	logging.Logger.Debug("generate block (assemble+update)", zap.Int64("round", b.Round), zap.Duration("time", time.Since(start)))
+	logging.Logger.Debug("generate block (assemble+update)",
+		zap.Int64("round", b.Round),
+		zap.Int("txns", len(b.Txns)),
+		zap.Duration("time", time.Since(start)))
 
 	if err = mc.hashAndSignGeneratedBlock(ctx, b); err != nil {
 		return err
