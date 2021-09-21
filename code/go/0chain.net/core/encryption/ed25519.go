@@ -85,8 +85,16 @@ func (ed *ED25519Scheme) Sign(hash interface{}) (string, error) {
 	return signED25519(ed.privateKey, hash)
 }
 
+func (ed *ED25519Scheme) SignV2(hash interface{}) (string, error) {
+	return signED25519(ed.privateKey, hash)
+}
+
 //Verify - implement interface
 func (ed *ED25519Scheme) Verify(signature string, hash string) (bool, error) {
+	return verifyED25519(ed.publicKey, signature, hash)
+}
+
+func (ed *ED25519Scheme) VerifyV2(signature string, hash string) (bool, error) {
 	return verifyED25519(ed.publicKey, signature, hash)
 }
 

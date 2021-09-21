@@ -294,6 +294,19 @@ func (t *Transaction) GetSignatureScheme(ctx context.Context) (encryption.Signat
 	return co.GetSignatureScheme(), nil
 }
 
+func (t *Transaction) GetPublicKeyStr(ctx context.Context) (string, error) {
+	if t.PublicKey != "" {
+		return t.PublicKey, nil
+	}
+
+	co, err := client.GetClient(ctx, t.ClientID)
+	if err != nil {
+		return "", err
+	}
+
+	return co.PublicKey, nil
+}
+
 /*Provider - entity provider for client object */
 func Provider() datastore.Entity {
 	t := &Transaction{}
@@ -398,3 +411,25 @@ func GetTransactionCount() uint64 {
 func IncTransactionCount() uint64 {
 	return atomic.AddUint64(&transactionCount, 1)
 }
+
+//int blsSignHash(blsSignature *sig, const blsSecretKey *sec, const void *h, mclSize size)
+//{
+//G Hm;
+//if (!toG(Hm, h, size)) return -1;
+//Fr s = *cast(&sec->v);
+//GmulCT(*cast(&sig->v), Hm, s);
+//return 0;
+//}
+
+//void blsSign(blsSignature *sig, const blsSecretKey *sec, const void *m, mclSize size)
+//{
+//blsHashToSignature(sig, m, size);
+//Fr s = *cast(&sec->v);
+//GmulCT(*cast(&sig->v), *cast(&sig->v), s);
+//}
+
+//int blsHashToSignature(blsSignature *sig, const void *buf, mclSize bufSize)
+//{
+//hashAndMapToG(*cast(&sig->v), buf, bufSize);
+//return 0;
+//}

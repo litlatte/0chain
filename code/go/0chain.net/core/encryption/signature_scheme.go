@@ -21,6 +21,7 @@ type SignatureScheme interface {
 	GetPublicKey() string
 
 	Sign(hash interface{}) (string, error)
+	SignV2(hash interface{}) (string, error)
 	Verify(signature string, hash string) (bool, error)
 }
 

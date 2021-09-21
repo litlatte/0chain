@@ -81,6 +81,7 @@ func (b0 *BLS0ChainScheme) ReadKeys(reader io.Reader) error {
 //
 // This is an example of the raw public key we expect from MIRACL
 var miraclExamplePK = `0418a02c6bd223ae0dfda1d2f9a3c81726ab436ce5e9d17c531ff0a385a13a0b491bdfed3a85690775ee35c61678957aaba7b1a1899438829f1dc94248d87ed36817f6dfafec19bfa87bf791a4d694f43fec227ae6f5a867490e30328cac05eaff039ac7dfc3364e851ebd2631ea6f1685609fc66d50223cc696cb59ff2fee47ac`
+
 //
 // This is an example of the same MIRACL public key serialized with ToString().
 // pk ([1bdfed3a85690775ee35c61678957aaba7b1a1899438829f1dc94248d87ed368,18a02c6bd223ae0dfda1d2f9a3c81726ab436ce5e9d17c531ff0a385a13a0b49],[039ac7dfc3364e851ebd2631ea6f1685609fc66d50223cc696cb59ff2fee47ac,17f6dfafec19bfa87bf791a4d694f43fec227ae6f5a867490e30328cac05eaff])
@@ -89,9 +90,9 @@ func MiraclToHerumiPK(pk string) string {
 		return pk
 	}
 	n1 := pk[2:66]
-	n2 := pk[66:(66+64)]
-	n3 := pk[(66+64):(66+64+64)]
-	n4 := pk[(66+64+64):(66+64+64+64)]
+	n2 := pk[66:(66 + 64)]
+	n3 := pk[(66 + 64):(66 + 64 + 64)]
+	n4 := pk[(66 + 64 + 64):(66 + 64 + 64 + 64)]
 	var p bls.PublicKey
 	p.SetHexString("1 " + n2 + " " + n1 + " " + n4 + " " + n3)
 	return p.SerializeToHexStr()
@@ -103,6 +104,7 @@ func MiraclToHerumiPK(pk string) string {
 //
 // If the 'sig' was not in MIRACL format, we just return the original sig.
 var miraclExampleSig = `(0d4dbad6d2586d5e01b6b7fbad77e4adfa81212c52b4a0b885e19c58e0944764,110061aa16d5ba36eef0ad4503be346908d3513c0a2aedfd0d2923411b420eca)`
+
 func MiraclToHerumiSig(sig string) string {
 	if len(sig) <= 2 {
 		return sig
@@ -110,13 +112,13 @@ func MiraclToHerumiSig(sig string) string {
 	if sig[0] != miraclExampleSig[0] {
 		return sig
 	}
-	withoutParens := sig[1: (len(sig)-1) ]
+	withoutParens := sig[1:(len(sig) - 1)]
 	comma := strings.Index(withoutParens, ",")
 	if comma < 0 {
 		return "00"
 	}
 	n1 := withoutParens[0:comma]
-	n2 := withoutParens[ (comma+1) : len(withoutParens)]
+	n2 := withoutParens[(comma + 1):len(withoutParens)]
 	var sign bls.Sign
 	sign.SetHexString("1 " + n1 + " " + n2)
 	return sign.SerializeToHexStr()
@@ -158,12 +160,39 @@ func (b0 *BLS0ChainScheme) Sign(hash interface{}) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	sig := sk.SignHash(rawHash)
+	return sig.SerializeToHexStr(), nil
+}
+
+func (b0 *BLS0ChainScheme) SignV2(hash interface{}) (string, error) {
+	var sk bls.SecretKey
+	sk.SetLittleEndian(b0.privateKey)
+	rawHash, err := GetRawHash(hash)
+	if err != nil {
+		return "", err
+	}
 	sig := sk.Sign(string(rawHash))
 	return sig.SerializeToHexStr(), nil
 }
 
 //Verify - implement interface
 func (b0 *BLS0ChainScheme) Verify(signature string, hash string) (bool, error) {
+	pk, err := b0.getPublicKey()
+	if err != nil {
+		return false, err
+	}
+	sign, err := b0.GetSignature(signature)
+	if err != nil {
+		return false, err
+	}
+	rawHash, err := hex.DecodeString(hash)
+	if err != nil {
+		return false, err
+	}
+	return sign.VerifyHash(pk, rawHash), nil
+}
+
+func (b0 *BLS0ChainScheme) VerifyV2(signature string, hash string) (bool, error) {
 	pk, err := b0.getPublicKey()
 	if err != nil {
 		return false, err
@@ -185,7 +214,7 @@ func (b0 *BLS0ChainScheme) GetSignature(signature string) (*bls.Sign, error) {
 		return nil, errors.New("empty signature")
 	}
 	var sign bls.Sign
-	err := sign.DeserializeHexStr( MiraclToHerumiSig(signature) )
+	err := sign.DeserializeHexStr(MiraclToHerumiSig(signature))
 	if err != nil {
 		return nil, err
 	}
@@ -258,8 +287,196 @@ func (b0 *BLS0ChainScheme) AggregateSignatures(signatures []string) (string, err
 	var aggSign bls.Sign
 	for _, signature := range signatures {
 		var sign bls.Sign
-		sign.DeserializeHexStr( MiraclToHerumiSig(signature) )
+		sign.DeserializeHexStr(MiraclToHerumiSig(signature))
 		aggSign.Add(&sign)
 	}
 	return aggSign.SerializeToHexStr(), nil
+}
+
+type BLS0ChainSign struct {
+	sig *bls.Sign
+}
+
+func BLS0ChainAggregateSignatures(signatures []string) (*BLS0ChainSign, error) {
+	var aggSign bls.Sign
+	sigNum := len(signatures)
+	signs := make([]bls.Sign, sigNum)
+	//workersNum := runtime.NumCPU() / 2
+	//batchSize := sigNum / workersNum
+	//if batchSize == 0 {
+	//	if err := decodeSignatures(signatures, 0, signs); err != nil {
+	//		return nil, err
+	//	}
+	//} else {
+	//	if batchSize*workersNum < sigNum {
+	//		workersNum++
+	//	}
+	//
+	//	errC := make(chan error, 1)
+	//	doneC := make(chan struct{})
+	//	wg := sync.WaitGroup{}
+	//	for i := 0; i < workersNum; i++ {
+	//		start := i * batchSize
+	//		end := (i + 1) * batchSize
+	//		if end > sigNum {
+	//			end = sigNum
+	//		}
+	//		wg.Add(1)
+	//		go func(start, end int) {
+	//			defer wg.Done()
+	//			if err := decodeSignatures(signatures[start:end], start, signs); err != nil {
+	//				errC <- err
+	//				return
+	//			}
+	//		}(start, end)
+	//	}
+	//	go func() {
+	//		wg.Wait()
+	//		close(doneC)
+	//	}()
+	//
+	//	select {
+	//	case err := <-errC:
+	//		return nil, err
+	//	case <-doneC:
+	//	}
+	//}
+
+	for i, signature := range signatures {
+		var sign bls.Sign
+		if err := sign.DeserializeHexStr(signature); err != nil {
+			return nil, err
+		}
+		signs[i] = sign
+	}
+
+	aggSign.Aggregate(signs)
+	return &BLS0ChainSign{sig: &aggSign}, nil
+}
+
+func decodeSignatures(signatures []string, start int, outSigs []bls.Sign) error {
+	//var aggSign bls.Sign
+	//signs := make([]bls.Sign, len(signatures))
+	for i, signature := range signatures {
+		var sign bls.Sign
+		if err := sign.DeserializeHexStr(signature); err != nil {
+			return err
+		}
+		outSigs[start+i] = sign
+	}
+
+	return nil
+	//aggSign.Aggregate(signs)
+	//return &BLS0ChainSign{sig: &aggSign}, nil
+}
+
+func (sig *BLS0ChainSign) VerifyAggregate(pubKeys []bls.PublicKey, hashes []string) bool {
+	//pubKeys, err :=
+	//pubKeys := make([]bls.PublicKey, len(pks))
+	//for i, pkStr := range pks {
+	//	pk := bls.PublicKey{}
+	//	if err := pk.DeserializeHexStr(pkStr); err != nil {
+	//		return false
+	//	}
+	//	pubKeys[i] = pk
+	//}
+
+	//cn := runtime.NumCPU()
+	//batchSize := len(pks) / cn
+	//if cn*batchSize < len(pks) {
+	//	cn++
+	//}
+	//
+	//errC := make(chan error, cn)
+	//wg := sync.WaitGroup{}
+	//for i := 0; i < cn; i++ {
+	//	wg.Add(1)
+	//	go func(idx int) {
+	//		defer wg.Done()
+	//		start := idx * batchSize
+	//		end := (idx + 1) * batchSize
+	//		if end > len(pks) {
+	//			end = len(pks)
+	//		}
+	//
+	//		rlt, err := decodePublicKeys(pks[start:end])
+	//		if err != nil {
+	//			errC <- err
+	//			return
+	//		}
+	//
+	//		for j, pk := range rlt {
+	//			pubKeys[start+j] = pk
+	//		}
+	//		//fmt.Printf("%d, %d\n", start, start+len(rlt))
+	//	}(i)
+	//}
+	//doneC := make(chan struct{})
+	//go func() {
+	//	wg.Wait()
+	//	close(doneC)
+	//}()
+	//pubKeys, err := decodePublicKeys(pks)
+	//if err != nil {
+	//	return false
+	//}
+
+	hashBytes := make([][]byte, len(hashes))
+	for i := range hashes {
+		hb, err := GetRawHash(hashes[i])
+		if err != nil {
+			panic(err)
+		}
+
+		hashBytes[i] = hb
+	}
+
+	//select {
+	//case err := <-errC:
+	//	panic(err)
+	//	return false
+	//case <-doneC:
+	//}
+
+	return sig.sig.VerifyAggregateHashes(pubKeys, hashBytes)
+}
+
+func decodePublicKeys(pks []string) ([]bls.PublicKey, error) {
+	pubKeys := make([]bls.PublicKey, len(pks))
+	for i, pkStr := range pks {
+		pk := bls.PublicKey{}
+		if err := pk.DeserializeHexStr(pkStr); err != nil {
+			return nil, err
+		}
+		pubKeys[i] = pk
+	}
+	return pubKeys, nil
+
+	//pubKeys := make([]bls.PublicKey, len(pks))
+	//wg := sync.WaitGroup{}
+	//errC := make(chan error, 1)
+	//for i, pkStr := range pks {
+	//	wg.Add(1)
+	//	go func(idx int, str string) {
+	//		defer wg.Done()
+	//		pk := bls.PublicKey{}
+	//		if err := pk.DeserializeHexStr(str); err != nil {
+	//			errC <- err
+	//			return
+	//		}
+	//		pubKeys[idx] = pk
+	//	}(i, pkStr)
+	//}
+	//
+	//doneC := make(chan struct{})
+	//go func() {
+	//	wg.Wait()
+	//	close(doneC)
+	//}()
+	//select {
+	//case <-doneC:
+	//	return pubKeys, nil
+	//case err := <-errC:
+	//	return nil, err
+	//}
 }
