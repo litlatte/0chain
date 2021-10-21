@@ -439,6 +439,16 @@ func NewChainFromConfig() *Chain {
 		chain.SmartContractTimeout = DefaultSmartContractTimeout
 	}
 	chain.SmartContractSettingUpdatePeriod = viper.GetInt64("server_chain.smart_contract.setting_update_period")
+	chain.SmartContractStatsDb.Enabled = viper.GetBool("server_chain.smart_contract.stats_db.enabled")
+	chain.SmartContractStatsDb.Name = viper.GetString("server_chain.smart_contract.stats_db.name")
+	chain.SmartContractStatsDb.User = viper.GetString("server_chain.smart_contract.stats_db.user")
+	chain.SmartContractStatsDb.Password = viper.GetString("server_chain.smart_contract.stats_db.password")
+	chain.SmartContractStatsDb.Host = viper.GetString("server_chain.smart_contract.stats_db.host")
+	chain.SmartContractStatsDb.Port = viper.GetString("server_chain.smart_contract.stats_db.port")
+	chain.SmartContractStatsDb.MaxIdleConns = viper.GetInt("server_chain.smart_contract.stats_db.max_idle_conns")
+	chain.SmartContractStatsDb.MaxOpenConns = viper.GetInt("server_chain.smart_contract.stats_db.max_open_conns")
+	chain.SmartContractStatsDb.ConnMaxLifetime = viper.GetDuration("server_chain.smart_contract.stats_db.conn_max_lifetime")
+
 	chain.RoundTimeoutSofttoMin = viper.GetInt("server_chain.round_timeouts.softto_min")
 	chain.RoundTimeoutSofttoMult = viper.GetInt("server_chain.round_timeouts.softto_mult")
 	chain.RoundRestartMult = viper.GetInt("server_chain.round_timeouts.round_restart_mult")

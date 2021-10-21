@@ -33,13 +33,14 @@ require (
 	github.com/spf13/cobra v1.2.1
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.8.1
-	github.com/stretchr/objx v0.1.1 // indirect
 	github.com/stretchr/testify v1.7.0
 	github.com/valyala/gozstd v1.5.0
 	github.com/vmihailenco/msgpack v4.0.4+incompatible
 	go.uber.org/atomic v1.7.0
 	go.uber.org/zap v1.17.0
-	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
+	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 	gopkg.in/yaml.v2 v2.4.0
+	gorm.io/driver/postgres v1.1.2
+	gorm.io/gorm v1.21.16
 )

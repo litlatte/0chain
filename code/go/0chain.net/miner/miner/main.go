@@ -14,6 +14,8 @@ import (
 	"strconv"
 	"time"
 
+	"0chain.net/smartcontract/datastore"
+
 	"go.uber.org/zap"
 
 	"0chain.net/chaincore/block"
@@ -66,6 +68,10 @@ func main() {
 	initEntities()
 	serverChain := chain.NewChainFromConfig()
 	signatureScheme := serverChain.GetSignatureScheme()
+	err := setupStatsDb(serverChain.Config.SmartContractStatsDb)
+	if err != nil {
+		logging.Logger.Panic("Error starting sc stats database: " + err.Error())
+	}
 
 	logging.Logger.Info("Owner keys file", zap.String("filename", *keysFile))
 	reader, err := os.Open(*keysFile)
@@ -302,6 +308,14 @@ func main() {
 func done(ctx context.Context) {
 	mc := miner.GetMinerChain()
 	mc.Stop()
+}
+
+func setupStatsDb(dbAccess datastore.DbAccess) error {
+	err := datastore.SetupDatabase(dbAccess)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func readNonGenesisHostAndPort(keysFile *string) (string, string, int, string, string, error) {

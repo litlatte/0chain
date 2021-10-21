@@ -71,6 +71,17 @@ const (
 	StuckTimeThreshold // todo from chain
 	SmartContractTimeout
 	SmartContractSettingUpdatePeriod
+
+	SmartContractStatsDbEnabled
+	SmartContractStatsDbName
+	SmartContractStatsDbUser
+	SmartContractStatsDbPassword
+	SmartContractStatsDbHost
+	SmartContractStatsDbPort
+	SmartContractStatsDbMaxIdleConns
+	SmartContractStatsDbMaxOpenConns
+	SmartContractStatsDbConnMaxLifetime
+
 	LfbTicketRebroadcastTimeout              // todo restart worker
 	LfbTicketAhead                           // todo from chain
 	AsyncFetchingMaxSimultaneousFromMiners   // todo restart worker
@@ -138,8 +149,19 @@ var GlobalSettingName = []string{
 	"server_chain.state.sync.timeout",
 	"server_chain.stuck.check_interval",
 	"server_chain.stuck.time_threshold",
+
 	"server_chain.smart_contract.timeout",
 	"server_chain.smart_contract.setting_update_period",
+	"server_chain.smart_contract.stats_db.enabled",
+	"server_chain.smart_contract.stats_db.name",
+	"server_chain.smart_contract.stats_db.user",
+	"server_chain.smart_contract.stats_db.password",
+	"server_chain.smart_contract.stats_db.host",
+	"server_chain.smart_contract.stats_db.port",
+	"server_chain.smart_contract.stats_db.max_idle_conns",
+	"server_chain.smart_contract.stats_db.max_open_conns",
+	"server_chain.smart_contract.stats_db.conn_max_lifetime",
+
 	"server_chain.lfb_ticket.rebroadcast_timeout",
 	"server_chain.lfb_ticket.ahead",
 	"server_chain.async_blocks_fetching.max_simultaneous_from_miners",
@@ -207,8 +229,18 @@ var GlobalSettingInfo = map[string]struct {
 	GlobalSettingName[StateSyncTimeout]:                  {smartcontract.Duration, false},
 	GlobalSettingName[StuckCheckInterval]:                {smartcontract.Duration, false},
 	GlobalSettingName[StuckTimeThreshold]:                {smartcontract.Duration, false},
-	GlobalSettingName[SmartContractTimeout]:              {smartcontract.Duration, true},
-	GlobalSettingName[SmartContractSettingUpdatePeriod]:  {smartcontract.Int64, true},
+
+	GlobalSettingName[SmartContractTimeout]:                {smartcontract.Duration, true},
+	GlobalSettingName[SmartContractSettingUpdatePeriod]:    {smartcontract.Int64, true},
+	GlobalSettingName[SmartContractStatsDbEnabled]:         {smartcontract.Boolean, true},
+	GlobalSettingName[SmartContractStatsDbName]:            {smartcontract.String, true},
+	GlobalSettingName[SmartContractStatsDbUser]:            {smartcontract.String, true},
+	GlobalSettingName[SmartContractStatsDbPassword]:        {smartcontract.String, true},
+	GlobalSettingName[SmartContractStatsDbHost]:            {smartcontract.String, true},
+	GlobalSettingName[SmartContractStatsDbPort]:            {smartcontract.String, true},
+	GlobalSettingName[SmartContractStatsDbMaxIdleConns]:    {smartcontract.Int, true},
+	GlobalSettingName[SmartContractStatsDbMaxOpenConns]:    {smartcontract.Int, true},
+	GlobalSettingName[SmartContractStatsDbConnMaxLifetime]: {smartcontract.Duration, true},
 
 	GlobalSettingName[LfbTicketRebroadcastTimeout]:              {smartcontract.Duration, false},
 	GlobalSettingName[LfbTicketAhead]:                           {smartcontract.Int, false},

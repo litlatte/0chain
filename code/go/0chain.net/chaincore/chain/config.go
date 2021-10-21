@@ -6,6 +6,7 @@ import (
 	"0chain.net/smartcontract/minersc"
 
 	"0chain.net/core/datastore"
+	sc_datastore "0chain.net/smartcontract/datastore"
 )
 
 const (
@@ -49,43 +50,45 @@ type HealthCheckCycleScan struct {
 
 //Config - chain Configuration
 type Config struct {
-	OwnerID              datastore.Key `json:"owner_id"`                // Client who created this chain
-	BlockSize            int32         `json:"block_size"`              // Number of transactions in a block
-	MinBlockSize         int32         `json:"min_block_size"`          // Number of transactions a block needs to have
-	MaxByteSize          int64         `json:"max_byte_size"`           // Max number of bytes a block can have
-	MinGenerators        int           `json:"min_generators"`          // Min number of block generators.
-	GeneratorsPercent    float64       `json:"generators_percent"`      // Percentage of all miners
-	NumReplicators       int           `json:"num_replicators"`         // Number of sharders that can store the block
-	ThresholdByCount     int           `json:"threshold_by_count"`      // Threshold count for a block to be notarized
-	ThresholdByStake     int           `json:"threshold_by_stake"`      // Stake threshold for a block to be notarized
-	ValidationBatchSize  int           `json:"validation_size"`         // Batch size of txns for crypto verification
-	TxnMaxPayload        int           `json:"transaction_max_payload"` // Max payload allowed in the transaction
-	PruneStateBelowCount int           `json:"prune_state_below_count"` // Prune state below these many rounds
-	RoundRange           int64         `json:"round_range"`             // blocks are stored in separate directory for each range of rounds
+	OwnerID              datastore.Key `json:"owner_id" :"owner_id"`                               // Client who created this chain
+	BlockSize            int32         `json:"block_size" :"block_size"`                           // Number of transactions in a block
+	MinBlockSize         int32         `json:"min_block_size" :"min_block_size"`                   // Number of transactions a block needs to have
+	MaxByteSize          int64         `json:"max_byte_size" :"max_byte_size"`                     // Max number of bytes a block can have
+	MinGenerators        int           `json:"min_generators" :"min_generators"`                   // Min number of block generators.
+	GeneratorsPercent    float64       `json:"generators_percent" :"generators_percent"`           // Percentage of all miners
+	NumReplicators       int           `json:"num_replicators" :"num_replicators"`                 // Number of sharders that can store the block
+	ThresholdByCount     int           `json:"threshold_by_count" :"threshold_by_count"`           // Threshold count for a block to be notarized
+	ThresholdByStake     int           `json:"threshold_by_stake" :"threshold_by_stake"`           // Stake threshold for a block to be notarized
+	ValidationBatchSize  int           `json:"validation_size" :"validation_batch_size"`           // Batch size of txns for crypto verification
+	TxnMaxPayload        int           `json:"transaction_max_payload" :"txn_max_payload"`         // Max payload allowed in the transaction
+	PruneStateBelowCount int           `json:"prune_state_below_count" :"prune_state_below_count"` // Prune state below these many rounds
+	RoundRange           int64         `json:"round_range" :"round_range"`                         // blocks are stored in separate directory for each range of rounds
 	// todo move BlocksToSharder out of Config
-	BlocksToSharder       int `json:"blocks_to_sharder"`       // send finalized or notarized blocks to sharder
-	VerificationTicketsTo int `json:"verification_tickets_to"` // send verification tickets to generator or all miners
+	BlocksToSharder       int `json:"blocks_to_sharder" :"blocks_to_sharder"`             // send finalized or notarized blocks to sharder
+	VerificationTicketsTo int `json:"verification_tickets_to" :"verification_tickets_to"` // send verification tickets to generator or all miners
 
-	HealthShowCounters bool `json:"health_show_counters"` // display detail counters
+	HealthShowCounters bool `json:"health_show_counters" :"health_show_counters"` // display detail counters
 	// Health Check switches
-	HCCycleScan [2]HealthCheckCycleScan
+	HCCycleScan [2]HealthCheckCycleScan `:"hc_cycle_scan"`
 
-	BlockProposalMaxWaitTime time.Duration `json:"block_proposal_max_wait_time"` // max time to wait to receive a block proposal
-	BlockProposalWaitMode    int8          `json:"block_proposal_wait_mode"`     // wait time for the block proposal is static (0) or dynamic (1)
+	BlockProposalMaxWaitTime time.Duration `json:"block_proposal_max_wait_time" :"block_proposal_max_wait_time"` // max time to wait to receive a block proposal
+	BlockProposalWaitMode    int8          `json:"block_proposal_wait_mode" :"block_proposal_wait_mode"`         // wait time for the block proposal is static (0) or dynamic (1)
 
-	ReuseTransactions bool `json:"reuse_txns"` // indicates if transactions from unrelated blocks can be reused
+	ReuseTransactions bool `json:"reuse_txns" :"reuse_transactions"` // indicates if transactions from unrelated blocks can be reused
 
-	ClientSignatureScheme string `json:"client_signature_scheme"` // indicates which signature scheme is being used
+	ClientSignatureScheme string `json:"client_signature_scheme" :"client_signature_scheme"` // indicates which signature scheme is being used
 
-	MinActiveSharders    int `json:"min_active_sharders"`    // Minimum active sharders required to validate blocks
-	MinActiveReplicators int `json:"min_active_replicators"` // Minimum active replicators of a block that should be active to verify the block
+	MinActiveSharders    int `json:"min_active_sharders" :"min_active_sharders"`       // Minimum active sharders required to validate blocks
+	MinActiveReplicators int `json:"min_active_replicators" :"min_active_replicators"` // Minimum active replicators of a block that should be active to verify the block
 
-	SmartContractTimeout             time.Duration `json:"smart_contract_timeout"`               // time after which the smart contract execution will timeout
-	SmartContractSettingUpdatePeriod int64         `json:"smart_contract_setting_update_period"` // rounds settings are updated
+	SmartContractTimeout             time.Duration `json:"smart_contract_timeout" :"smart_contract_timeout"`                             // time after which the smart contract execution will timeout
+	SmartContractSettingUpdatePeriod int64         `json:"smart_contract_setting_update_period" :"smart_contract_setting_update_period"` // rounds settings are updated
 
-	RoundTimeoutSofttoMin  int `json:"softto_min"`         // minimum time for softtimeout to kick in milliseconds
-	RoundTimeoutSofttoMult int `json:"softto_mult"`        // multiplier of mean network time for soft timeout
-	RoundRestartMult       int `json:"round_restart_mult"` // multiplier of soft timeouts to restart a round
+	RoundTimeoutSofttoMin  int `json:"softto_min" :"round_timeout_softto_min"`   // minimum time for softtimeout to kick in milliseconds
+	RoundTimeoutSofttoMult int `json:"softto_mult" :"round_timeout_softto_mult"` // multiplier of mean network time for soft timeout
+	RoundRestartMult       int `json:"round_restart_mult" :"round_restart_mult"` // multiplier of soft timeouts to restart a round
+
+	SmartContractStatsDb sc_datastore.DbAccess `json:"smart_contract_stats_db" :"smart_contract_stats_db"`
 }
 
 func (conf *Config) Update(cf *minersc.GlobalSettings) error {
@@ -196,6 +199,42 @@ func (conf *Config) Update(cf *minersc.GlobalSettings) error {
 		conf.SmartContractTimeout = DefaultSmartContractTimeout
 	}
 	conf.SmartContractSettingUpdatePeriod, err = cf.GetInt64(minersc.SmartContractSettingUpdatePeriod)
+	if err != nil {
+		return err
+	}
+	conf.SmartContractStatsDb.Enabled, err = cf.GetBool(minersc.SmartContractStatsDbEnabled)
+	if err != nil {
+		return err
+	}
+	conf.SmartContractStatsDb.Name, err = cf.GetString(minersc.SmartContractStatsDbName)
+	if err != nil {
+		return err
+	}
+	conf.SmartContractStatsDb.User, err = cf.GetString(minersc.SmartContractStatsDbUser)
+	if err != nil {
+		return err
+	}
+	conf.SmartContractStatsDb.Password, err = cf.GetString(minersc.SmartContractStatsDbPassword)
+	if err != nil {
+		return err
+	}
+	conf.SmartContractStatsDb.Host, err = cf.GetString(minersc.SmartContractStatsDbHost)
+	if err != nil {
+		return err
+	}
+	conf.SmartContractStatsDb.Port, err = cf.GetString(minersc.SmartContractStatsDbPort)
+	if err != nil {
+		return err
+	}
+	conf.SmartContractStatsDb.MaxIdleConns, err = cf.GetInt(minersc.SmartContractStatsDbMaxIdleConns)
+	if err != nil {
+		return err
+	}
+	conf.SmartContractStatsDb.MaxOpenConns, err = cf.GetInt(minersc.SmartContractStatsDbMaxOpenConns)
+	if err != nil {
+		return err
+	}
+	conf.SmartContractStatsDb.ConnMaxLifetime, err = cf.GetDuration(minersc.SmartContractStatsDbConnMaxLifetime)
 	if err != nil {
 		return err
 	}
