@@ -94,6 +94,16 @@ server_chain:
   smart_contract:
     setting_update_period: 200 #rounds
     timeout: 8000ms
+    stats_db:
+      enabled: true
+      name: stats_db
+      user: zchain_user
+      password: zchian
+      host: localhost
+      port: 5432
+      max_idle_conns: 100
+      max_open_conns: 200
+      conn_max_lifetime: 20s
   health_check:
     show_counters: true
     deep_scan:
