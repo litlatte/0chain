@@ -153,7 +153,7 @@ func TestStorageSmartContract_addBlobber_updateSettings(t *testing.T) {
 
 	var blob = newClient(0, balances)
 	blob.terms = avgTerms
-	blob.cap = 2*GB
+	blob.cap = 2 * GB
 
 	_, err = blob.callAddBlobber(t, ssc, tp, balances)
 	require.NoError(t, err)
@@ -613,10 +613,11 @@ func Test_flow_reward(t *testing.T) {
 		alloc, err = ssc.getAllocation(allocID, balances)
 		require.NoError(t, err)
 
-		// load validators
-		var validators *ValidatorNodes
-		validators, err = ssc.getValidatorsList(balances)
-		require.NoError(t, err)
+		// todo load validators
+		//var validators *ValidatorNodes
+		//validators, err = ssc.getValidatorsList(balances)
+		//require.NoError(t, err)
+		var validators []*ValidationNodeSC
 
 		// load blobber
 		var blobber *StorageNode
@@ -644,7 +645,7 @@ func Test_flow_reward(t *testing.T) {
 			}
 
 			challID = fmt.Sprintf("chall-%d", i)
-			genChall(t, ssc, b3.id, tp, prevID, challID, i, validators.Nodes,
+			genChall(t, ssc, b3.id, tp, prevID, challID, i, validators,
 				alloc.ID, blobber, allocRoot, balances)
 
 			var chall = new(ChallengeResponse)
@@ -816,9 +817,10 @@ func Test_flow_penalty(t *testing.T) {
 		require.NoError(t, err)
 
 		// load validators
-		var validators *ValidatorNodes
-		validators, err = ssc.getValidatorsList(balances)
-		require.NoError(t, err)
+		//var validators *ValidatorNodes
+		//validators, err = ssc.getValidatorsList(balances)
+		//require.NoError(t, err)
+		var validators []*ValidationNodeSC
 
 		// load blobber
 		var blobber *StorageNode
@@ -847,7 +849,7 @@ func Test_flow_penalty(t *testing.T) {
 			}
 
 			challID = fmt.Sprintf("chall-%d", i)
-			genChall(t, ssc, b4.id, tp, prevID, challID, i, validators.Nodes,
+			genChall(t, ssc, b4.id, tp, prevID, challID, i, validators,
 				alloc.ID, blobber, allocRoot, balances)
 
 			var chall = new(ChallengeResponse)
@@ -1045,10 +1047,11 @@ func Test_flow_no_challenge_responses_finalize(t *testing.T) {
 		alloc, err = ssc.getAllocation(allocID, balances)
 		require.NoError(t, err)
 
-		// load validators
-		var validators *ValidatorNodes
-		validators, err = ssc.getValidatorsList(balances)
-		require.NoError(t, err)
+		// todo load validators
+		//var validators *ValidatorNodes
+		//validators, err = ssc.getValidatorsList(balances)
+		//require.NoError(t, err)
+		var validators []*ValidationNodeSC
 
 		// ---------------
 
@@ -1074,7 +1077,7 @@ func Test_flow_no_challenge_responses_finalize(t *testing.T) {
 					prevID = fmt.Sprintf("chall-%s-%d", b.id, i-1)
 				}
 				genChall(t, ssc, b.id, tp, prevID, challID, i,
-					validators.Nodes, alloc.ID, blobber, allocRoot, balances)
+					validators, alloc.ID, blobber, allocRoot, balances)
 				gfc++
 			}
 		}
@@ -1278,10 +1281,11 @@ func Test_flow_no_challenge_responses_cancel(t *testing.T) {
 		alloc, err = ssc.getAllocation(allocID, balances)
 		require.NoError(t, err)
 
-		// load validators
-		var validators *ValidatorNodes
-		validators, err = ssc.getValidatorsList(balances)
-		require.NoError(t, err)
+		// todo load validators
+		//var validators *ValidatorNodes
+		//validators, err = ssc.getValidatorsList(balances)
+		//require.NoError(t, err)
+		var validators []*ValidationNodeSC
 
 		// ---------------
 
@@ -1307,7 +1311,7 @@ func Test_flow_no_challenge_responses_cancel(t *testing.T) {
 					prevID = fmt.Sprintf("chall-%s-%d", b.id, i-1)
 				}
 				genChall(t, ssc, b.id, tp, prevID, challID, i,
-					validators.Nodes, alloc.ID, blobber, allocRoot, balances)
+					validators, alloc.ID, blobber, allocRoot, balances)
 			}
 		}
 

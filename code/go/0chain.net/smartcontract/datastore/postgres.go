@@ -54,6 +54,6 @@ func (store *postgresStore) Close() {
 	}
 }
 
-func (store *postgresStore) GetDB() *gorm.DB {
+func (store *postgresStore) Get() *gorm.DB {
 	return store.db
 }

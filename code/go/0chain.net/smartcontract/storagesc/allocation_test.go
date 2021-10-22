@@ -1,15 +1,16 @@
 package storagesc
 
 import (
-	"0chain.net/chaincore/mocks"
-	sci "0chain.net/chaincore/smartcontractinterface"
 	"encoding/json"
 	"fmt"
-	"github.com/stretchr/testify/mock"
 	"strconv"
 	"strings"
 	"testing"
 	"time"
+
+	"0chain.net/chaincore/mocks"
+	sci "0chain.net/chaincore/smartcontractinterface"
+	"github.com/stretchr/testify/mock"
 
 	chainState "0chain.net/chaincore/chain/state"
 	"0chain.net/chaincore/state"
@@ -1624,10 +1625,11 @@ func Test_finalize_allocation(t *testing.T) {
 	alloc, err = ssc.getAllocation(allocID, balances)
 	require.NoError(t, err)
 
-	// load validators
-	var validators *ValidatorNodes
-	validators, err = ssc.getValidatorsList(balances)
-	require.NoError(t, err)
+	// todo load validators
+	//var validators *ValidatorNodes
+	//validators, err = ssc.getValidatorsList(balances)
+	//require.NoError(t, err)
+	var validators []*ValidationNodeSC
 
 	// load blobber
 	var blobber *StorageNode
@@ -1645,7 +1647,7 @@ func Test_finalize_allocation(t *testing.T) {
 		tp += step / 2
 
 		challID = fmt.Sprintf("chall-%d", i)
-		genChall(t, ssc, b1.id, tp, prevID, challID, i, validators.Nodes,
+		genChall(t, ssc, b1.id, tp, prevID, challID, i, validators,
 			alloc.ID, blobber, allocRoot, balances)
 
 		var chall = new(ChallengeResponse)

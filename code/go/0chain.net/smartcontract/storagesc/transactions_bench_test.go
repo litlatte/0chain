@@ -1,3 +1,5 @@
+// +build remove
+
 package storagesc
 
 import (
@@ -465,12 +467,12 @@ func Benchmark_verifyChallenge(b *testing.B) {
 					var vx = blobsMap[v.ID]
 					challResp.ValidationTickets = append(
 						challResp.ValidationTickets,
-						vx.validTicket(b, chall.ID, chall.Blobber.ID, true, tp),
+						vx.validTicket(b, chall.ID, "", true, tp),
 					)
 				}
 
 				// 6.3 keep for the benchmark
-				blobberID = chall.Blobber.ID
+				//blobberID = chall.Blobber.ID
 
 				// 6.4 prepare transaction
 				tp += 1

@@ -14,6 +14,8 @@ import (
 	"strconv"
 	"time"
 
+	"0chain.net/smartcontract/storagesc"
+
 	"0chain.net/smartcontract/datastore"
 
 	"go.uber.org/zap"
@@ -312,6 +314,10 @@ func done(ctx context.Context) {
 
 func setupStatsDb(dbAccess datastore.DbAccess) error {
 	err := datastore.SetupDatabase(dbAccess)
+	if err != nil {
+		return err
+	}
+	err = storagesc.MigrateChallengeTable()
 	if err != nil {
 		return err
 	}

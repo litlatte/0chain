@@ -22,7 +22,7 @@ type DbAccess struct {
 }
 
 type Store interface {
-	GetDB() *gorm.DB
+	Get() *gorm.DB
 	Open(config DbAccess) error
 	Close()
 }

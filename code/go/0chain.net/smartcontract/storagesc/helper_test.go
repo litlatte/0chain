@@ -372,7 +372,7 @@ func setConfig(t testing.TB, balances chainState.StateContextI) (
 
 func genChall(t testing.TB, ssc *StorageSmartContract,
 	blobberID string, now int64, prevID, challID string, seed int64,
-	valids []*ValidationNode, allocID string, blobber *StorageNode,
+	valids []*ValidationNodeSC, allocID string, blobber *StorageNode,
 	allocRoot string, balances chainState.StateContextI) {
 
 	var blobberChall, err = ssc.getBlobberChallenge(blobberID, balances)
@@ -385,12 +385,12 @@ func genChall(t testing.TB, ssc *StorageSmartContract,
 	}
 	var storChall = new(StorageChallenge)
 	storChall.Created = common.Timestamp(now)
-	storChall.ID = challID
+	storChall.ChallengeID = challID
 	storChall.PrevID = prevID
 	storChall.Validators = valids
 	storChall.RandomNumber = seed
 	storChall.AllocationID = allocID
-	storChall.Blobber = blobber
+	//storChall.Blobber = blobber
 	storChall.AllocationRoot = allocRoot
 
 	require.True(t, blobberChall.addChallenge(storChall))

@@ -9,6 +9,8 @@ import (
 	"strings"
 	"time"
 
+	"gorm.io/gorm"
+
 	chainstate "0chain.net/chaincore/chain/state"
 	"0chain.net/chaincore/node"
 	"0chain.net/chaincore/state"
@@ -86,15 +88,19 @@ func (an *Allocations) GetHashBytes() []byte {
 }
 
 type ChallengeResponse struct {
-	ID                string              `json:"challenge_id"`
-	ValidationTickets []*ValidationTicket `json:"validation_tickets"`
+	gorm.Model
+	StorageChallengeId int                 `json:"storage_challenge_id" gorm:"storage_challenge_id"`
+	ID                 string              `json:"challenge_id"`
+	ValidationTickets  []*ValidationTicket `json:"validation_tickets" gorm:"ForeignKey:challenge_response_id"`
 }
 
 type BlobberChallenge struct {
+	gorm.Model
 	BlobberID                string                       `json:"blobber_id"`
-	Challenges               []*StorageChallenge          `json:"challenges"`
-	ChallengeMap             map[string]*StorageChallenge `json:"-"`
-	LatestCompletedChallenge *StorageChallenge            `json:"lastest_completed_challenge"`
+	ChallengeIds             []string                     `json:"challenge_ids" gorm:"-"`
+	Challenges               []*StorageChallenge          `json:"-" gorm:"ForeignKey:blobber_challenges_id"`
+	ChallengeMap             map[string]*StorageChallenge `json:"-" gorm:"-"`
+	LatestCompletedChallenge *StorageChallenge            `json:"latest_completed_challenge" gorm:"-"`
 }
 
 func (sn *BlobberChallenge) GetKey(globalKey string) datastore.Key {
@@ -121,7 +127,7 @@ func (sn *BlobberChallenge) Decode(input []byte) error {
 	}
 	sn.ChallengeMap = make(map[string]*StorageChallenge)
 	for _, challenge := range sn.Challenges {
-		sn.ChallengeMap[challenge.ID] = challenge
+		sn.ChallengeMap[challenge.ChallengeID] = challenge
 	}
 	return nil
 }
@@ -131,30 +137,40 @@ func (sn *BlobberChallenge) addChallenge(challenge *StorageChallenge) bool {
 		sn.Challenges = make([]*StorageChallenge, 0)
 		sn.ChallengeMap = make(map[string]*StorageChallenge)
 	}
-	if _, ok := sn.ChallengeMap[challenge.ID]; !ok {
+	if _, ok := sn.ChallengeMap[challenge.ChallengeID]; !ok {
 		if len(sn.Challenges) > 0 {
 			lastChallenge := sn.Challenges[len(sn.Challenges)-1]
-			challenge.PrevID = lastChallenge.ID
+			challenge.PrevID = lastChallenge.ChallengeID
 		} else if sn.LatestCompletedChallenge != nil {
-			challenge.PrevID = sn.LatestCompletedChallenge.ID
+			challenge.PrevID = sn.LatestCompletedChallenge.ChallengeID
 		}
 		sn.Challenges = append(sn.Challenges, challenge)
-		sn.ChallengeMap[challenge.ID] = challenge
+		sn.ChallengeMap[challenge.ChallengeID] = challenge
 		return true
 	}
 	return false
 }
 
 type StorageChallenge struct {
-	Created        common.Timestamp   `json:"created"`
-	ID             string             `json:"id"`
-	PrevID         string             `json:"prev_id"`
-	Validators     []*ValidationNode  `json:"validators"`
-	RandomNumber   int64              `json:"seed"`
-	AllocationID   string             `json:"allocation_id"`
-	Blobber        *StorageNode       `json:"blobber"`
-	AllocationRoot string             `json:"allocation_root"`
-	Response       *ChallengeResponse `json:"challenge_response,omitempty"`
+	gorm.Model
+	BlobberChallengesId      int                 `json:"blobber_challenges_id"`
+	Created                  common.Timestamp    `json:"created"`
+	ChallengeID              string              `json:"challenge_id"`
+	PrevID                   string              `json:"prev_id"`
+	Validators               []*ValidationNodeSC `json:"validators" gorm:"ForeignKey:storage_challenge_id"`
+	RandomNumber             int64               `json:"seed"`
+	AllocationID             string              `json:"allocation_id"`
+	AllocationRoot           string              `json:"allocation_root"`
+	Response                 *ChallengeResponse  `json:"challenge_response,omitempty" gorm:"ForeignKey:storage_challenge_id"`
+	LatestCompletedChallenge bool                `json:"-"`
+	//Blobber                  *StorageNode       `json:"blobber"`
+}
+
+type ValidationNodeSC struct {
+	gorm.Model
+	StorageChallengeId int    `json:"storage_challenge_id" gorm:"storage_challenge_id"`
+	ID                 string `json:"id"`
+	BaseURL            string `json:"url"`
 }
 
 type ValidationNode struct {
@@ -558,6 +574,9 @@ type StorageAllocation struct {
 	BlobberDetails    []*BlobberAllocation          `json:"blobber_details"`
 	BlobberMap        map[string]*BlobberAllocation `json:"-"`
 	IsImmutable       bool                          `json:"is_immutable"`
+
+	// this is needed by cancel allocation to calculate pass rates
+	OpenChallenges []common.Timestamp `json:"open_challenges"`
 
 	// Requested ranges.
 	ReadPriceRange             PriceRange    `json:"read_price_range"`
@@ -1237,15 +1256,17 @@ func (rm *ReadMarker) Verify(prevRM *ReadMarker, balances chainstate.StateContex
 }
 
 type ValidationTicket struct {
-	ChallengeID  string           `json:"challenge_id"`
-	BlobberID    string           `json:"blobber_id"`
-	ValidatorID  string           `json:"validator_id"`
-	ValidatorKey string           `json:"validator_key"`
-	Result       bool             `json:"success"`
-	Message      string           `json:"message"`
-	MessageCode  string           `json:"message_code"`
-	Timestamp    common.Timestamp `json:"timestamp"`
-	Signature    string           `json:"signature"`
+	gorm.Model
+	ChallengeResponseId int              `json:"challenge_response_id" gorm:"challenge_response_id"`
+	ChallengeID         string           `json:"challenge_id"`
+	BlobberID           string           `json:"blobber_id"`
+	ValidatorID         string           `json:"validator_id"`
+	ValidatorKey        string           `json:"validator_key"`
+	Result              bool             `json:"success"`
+	Message             string           `json:"message"`
+	MessageCode         string           `json:"message_code"`
+	Timestamp           common.Timestamp `json:"timestamp"`
+	Signature           string           `json:"signature"`
 }
 
 func (vt *ValidationTicket) VerifySign(balances chainstate.StateContextI) (bool, error) {

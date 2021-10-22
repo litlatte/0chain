@@ -35,7 +35,7 @@ func (sc *StorageSmartContract) completeChallengeForBlobber(
 			found = true
 		}
 	}
-	idx := 0
+	idx := 0 // todo remove this nonsense
 	if found && idx >= 0 && idx < len(blobberChallengeObj.Challenges) {
 		blobberChallengeObj.Challenges = append(blobberChallengeObj.Challenges[:idx], blobberChallengeObj.Challenges[idx+1:]...)
 		challengeCompleted.Response = challengeResponse
@@ -349,7 +349,7 @@ func (sc *StorageSmartContract) verifyChallenge(t *transaction.Transaction,
 	var challReq, ok = blobberChall.ChallengeMap[challResp.ID]
 	if !ok {
 		if blobberChall.LatestCompletedChallenge != nil &&
-			challResp.ID == blobberChall.LatestCompletedChallenge.ID &&
+			challResp.ID == blobberChall.LatestCompletedChallenge.ChallengeID &&
 			blobberChall.LatestCompletedChallenge.Response != nil {
 
 			return "Challenge Already redeemed by Blobber", nil
@@ -358,11 +358,11 @@ func (sc *StorageSmartContract) verifyChallenge(t *transaction.Transaction,
 			"Cannot find the challenge with ID %s", challResp.ID)
 	}
 
-	if challReq.Blobber.ID != t.ClientID {
-		return "", common.NewError("verify_challenge",
-			"Challenge response should be submitted by the same blobber"+
-				" as the challenge request")
-	}
+	//if challReq.Blobber.ID != t.ClientID {
+	//	return "", common.NewError("verify_challenge",
+	//		"Challenge response should be submitted by the same blobber"+
+	//			" as the challenge request")
+	//}
 
 	var alloc *StorageAllocation
 	alloc, err = sc.getAllocation(challReq.AllocationID, balances)
@@ -422,11 +422,15 @@ func (sc *StorageSmartContract) verifyChallenge(t *transaction.Transaction,
 				"First challenge on the list is not same as the one"+
 					" attempted to redeem")
 		}
-		alloc.Stats.LastestClosedChallengeTxn = challReq.ID
+		if err := removeStorageChallenge(challReq.ChallengeID); err != nil {
+			return "", err
+		}
+
+		alloc.Stats.LastestClosedChallengeTxn = challReq.ChallengeID
 		alloc.Stats.SuccessChallenges++
 		alloc.Stats.OpenChallenges--
 
-		details.Stats.LastestClosedChallengeTxn = challReq.ID
+		details.Stats.LastestClosedChallengeTxn = challReq.ChallengeID
 		details.Stats.SuccessChallenges++
 		details.Stats.OpenChallenges--
 
@@ -469,11 +473,11 @@ func (sc *StorageSmartContract) verifyChallenge(t *transaction.Transaction,
 				"First challenge on the list is not same as the one"+
 					" attempted to redeem")
 		}
-		alloc.Stats.LastestClosedChallengeTxn = challReq.ID
+		alloc.Stats.LastestClosedChallengeTxn = challReq.ChallengeID
 		alloc.Stats.FailedChallenges++
 		alloc.Stats.OpenChallenges--
 
-		details.Stats.LastestClosedChallengeTxn = challReq.ID
+		details.Stats.LastestClosedChallengeTxn = challReq.ChallengeID
 		details.Stats.FailedChallenges++
 		details.Stats.OpenChallenges--
 
@@ -729,16 +733,16 @@ func (sc *StorageSmartContract) addChallenge(alloc *StorageAllocation,
 	}
 
 	var storageChallenge StorageChallenge
-	storageChallenge.ID = challengeID
-	storageChallenge.Validators = selectedValidators
-	storageChallenge.Blobber = selectedBlobberObj
+	storageChallenge.ChallengeID = challengeID
+	//storageChallenge.Validators = selectedValidators
+	//storageChallenge.Blobber = selectedBlobberObj
 	storageChallenge.RandomNumber = challengeSeed
 	storageChallenge.AllocationID = alloc.ID
 
 	storageChallenge.AllocationRoot = blobberAllocation.AllocationRoot
 
 	blobberChallengeObj := &BlobberChallenge{}
-	blobberChallengeObj.BlobberID = storageChallenge.Blobber.ID
+	//blobberChallengeObj.BlobberID = storageChallenge.Blobber.ID
 
 	blobberChallengeBytes, _ := balances.GetTrieNode(blobberChallengeObj.GetKey(sc.ID))
 	if blobberChallengeBytes != nil {
@@ -750,12 +754,16 @@ func (sc *StorageSmartContract) addChallenge(alloc *StorageAllocation,
 	}
 
 	storageChallenge.Created = creationDate
+	alloc.OpenChallenges = append(alloc.OpenChallenges, creationDate)
 	addedChallege := blobberChallengeObj.addChallenge(&storageChallenge)
 	if !addedChallege {
 		challengeBytes, err := json.Marshal(storageChallenge)
 		return string(challengeBytes), err
 	}
-
+	err = storageChallenge.addToStatsDb(selectedBlobberObj.ID)
+	if err != nil {
+		return "", err
+	}
 	balances.InsertTrieNode(blobberChallengeObj.GetKey(sc.ID), blobberChallengeObj)
 
 	alloc.Stats.OpenChallenges++

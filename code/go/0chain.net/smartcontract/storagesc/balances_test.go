@@ -1,7 +1,13 @@
 package storagesc
 
 import (
+	"context"
+	"io/ioutil"
+	"os"
+	"path/filepath"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 
 	"0chain.net/chaincore/block"
 	"0chain.net/chaincore/state"
@@ -15,6 +21,65 @@ import (
 //
 // helper for tests implements chainState.StateContextI
 //
+type mptStore struct {
+	mpt  util.MerklePatriciaTrieI
+	mndb *util.MemoryNodeDB
+	lndb *util.LevelNodeDB
+	pndb *util.PNodeDB
+	dir  string
+}
+
+func newMptStore(tb testing.TB) (mpts *mptStore) {
+	mpts = new(mptStore)
+
+	var dir, err = ioutil.TempDir("", "storage-mpt")
+	require.NoError(tb, err)
+
+	mpts.pndb, err = util.NewPNodeDB(filepath.Join(dir, "data"),
+		filepath.Join(dir, "log"))
+	require.NoError(tb, err)
+
+	mpts.merge(tb)
+
+	mpts.dir = dir
+	return
+}
+
+func (mpts *mptStore) Close() (err error) {
+	if mpts == nil {
+		return
+	}
+	if mpts.pndb != nil {
+		mpts.pndb.Flush()
+	}
+	if mpts.dir != "" {
+		err = os.RemoveAll(mpts.dir)
+	}
+	return
+}
+
+func (mpts *mptStore) merge(tb testing.TB) {
+	if mpts == nil {
+		return
+	}
+
+	var root util.Key
+
+	if mpts.mndb != nil {
+		root = mpts.mpt.GetRoot()
+		require.NoError(tb, util.MergeState(
+			context.Background(), mpts.mndb, mpts.pndb,
+		))
+		// mpts.pndb.Flush()
+	}
+
+	// for a worst case, no cached data, and we have to get everything from
+	// the persistent store, from rocksdb
+
+	mpts.mndb = util.NewMemoryNodeDB()                           //
+	mpts.lndb = util.NewLevelNodeDB(mpts.mndb, mpts.pndb, false) // transaction
+	mpts.mpt = util.NewMerklePatriciaTrie(mpts.lndb, 1, root)    //
+}
 
 type testBalances struct {
 	balances  map[datastore.Key]state.Balance

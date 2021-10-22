@@ -1,13 +1,15 @@
 package storagesc
 
 import (
-	"0chain.net/smartcontract"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"net/url"
 	"sort"
+
+	"0chain.net/smartcontract"
+	"gorm.io/gorm"
 
 	chainstate "0chain.net/chaincore/chain/state"
 	"0chain.net/chaincore/state"
@@ -120,6 +122,7 @@ type delegatePool struct {
 // stake pool settings
 
 type stakePoolSettings struct {
+	gorm.Model
 	// DelegateWallet for pool owner.
 	DelegateWallet string `json:"delegate_wallet"`
 	// MinStake allowed.
