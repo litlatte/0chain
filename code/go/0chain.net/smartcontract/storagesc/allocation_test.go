@@ -1625,11 +1625,9 @@ func Test_finalize_allocation(t *testing.T) {
 	alloc, err = ssc.getAllocation(allocID, balances)
 	require.NoError(t, err)
 
-	// todo load validators
-	//var validators *ValidatorNodes
-	//validators, err = ssc.getValidatorsList(balances)
-	//require.NoError(t, err)
-	var validators []*ValidationNodeSC
+	// load validators
+	validators, err := getValidatorsList(balances)
+	require.NoError(t, err)
 
 	// load blobber
 	var blobber *StorageNode

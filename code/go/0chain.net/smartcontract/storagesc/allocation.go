@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"time"
 
+	"0chain.net/smartcontract/partitions"
+
 	chainstate "0chain.net/chaincore/chain/state"
 	"0chain.net/chaincore/state"
 	"0chain.net/chaincore/transaction"
@@ -48,23 +50,6 @@ func (sc *StorageSmartContract) getAllocationsList(clientID string,
 		return nil, fmt.Errorf("%w: %s", common.ErrDecoding, "failed to retrieve existing allocations list")
 	}
 	return clientAlloc.Allocations, nil
-}
-
-func (sc *StorageSmartContract) getAllAllocationsList(
-	balances chainstate.StateContextI) (*Allocations, error) {
-
-	allocationList := &Allocations{}
-
-	allocationListBytes, err := balances.GetTrieNode(ALL_ALLOCATIONS_KEY)
-	if allocationListBytes == nil {
-		return allocationList, nil
-	}
-	err = json.Unmarshal(allocationListBytes.Encode(), allocationList)
-	if err != nil {
-		return nil, common.NewError("getAllAllocationsList_failed",
-			"Failed to retrieve existing allocations list")
-	}
-	return allocationList, nil
 }
 
 func (sc *StorageSmartContract) removeUserAllocation(
@@ -121,14 +106,17 @@ func (sc *StorageSmartContract) addUserAllocation(
 	return nil
 }
 
-func (sc *StorageSmartContract) addAllocation(alloc *StorageAllocation,
-	balances chainstate.StateContextI) (string, error) {
+func (sc *StorageSmartContract) addAllocation(
+	alloc *StorageAllocation,
+	seed int64,
+	balances chainstate.StateContextI,
+) (string, error) {
 	var err error
 	if err != nil {
 		return "", common.NewErrorf("add_allocation_failed",
 			"Failed to get allocation list: %v", err)
 	}
-	all, err := sc.getAllAllocationsList(balances)
+	all, err := getAllAllocationsList(balances)
 	if err != nil {
 		return "", common.NewErrorf("add_allocation_failed",
 			"Failed to get allocation list: %v", err)
@@ -146,10 +134,13 @@ func (sc *StorageSmartContract) addAllocation(alloc *StorageAllocation,
 	if err := sc.addUserAllocation(alloc.Owner, alloc, balances); err != nil {
 		return "", common.NewError("add_allocation_failed", err.Error())
 	}
+	r := rand.New(rand.NewSource(seed))
+	alloc.AllAllocationsPartition, err = all.AddRand(partitions.ItemFromString(alloc.ID), r, balances)
+	if err != nil {
+		return "", common.NewError("add_allocation_failed", err.Error())
+	}
 
-	all.List.add(alloc.ID)
-
-	if _, err = balances.InsertTrieNode(ALL_ALLOCATIONS_KEY, all); err != nil {
+	if err = all.Save(balances); err != nil {
 		return "", common.NewErrorf("add_allocation_failed",
 			"saving all allocations list: %v", err)
 	}
@@ -395,7 +386,7 @@ func (sc *StorageSmartContract) newAllocationRequestInternal(
 		return "", common.NewError("allocation_creation_failed", err.Error())
 	}
 
-	if resp, err = sc.addAllocation(sa, balances); err != nil {
+	if resp, err = sc.addAllocation(sa, seed, balances); err != nil {
 		return "", common.NewErrorf("allocation_creation_failed", "%v", err)
 	}
 
@@ -1475,19 +1466,19 @@ func (sc *StorageSmartContract) finishAllocation(
 
 	alloc.Finalized = true
 
-	var all *Allocations
-	if all, err = sc.getAllAllocationsList(balances); err != nil {
+	all, err := getAllAllocationsList(balances)
+	if err != nil {
 		return common.NewError("fini_alloc_failed",
 			"getting all allocations list: "+err.Error())
 	}
 
-	if !all.List.remove(alloc.ID) {
+	err = all.Remove(partitions.ItemFromString(alloc.ID), alloc.AllAllocationsPartition, balances)
+	if err != nil {
 		return common.NewError("fini_alloc_failed",
 			"invalid state: allocation not found in all allocations list")
 	}
 
-	_, err = balances.InsertTrieNode(ALL_ALLOCATIONS_KEY, all)
-	if err != nil {
+	if err = all.Save(balances); err != nil {
 		return common.NewError("fini_alloc_failed",
 			"saving all allocations list: "+err.Error())
 	}

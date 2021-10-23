@@ -80,7 +80,6 @@ const (
 	SimulationNumSharderDelegates
 	SimulationNumVestingDestinationsClient
 	SimulationNumWriteRedeemAllocation
-	SimulationNumChallengesBlobber
 	NumberSimulationParameters
 )
 
@@ -171,7 +170,7 @@ func (w SimulatorParameter) String() string {
 		"num_miners",
 		"num_active_miners",
 		"nun_sharders",
-		"nun__active_sharders",
+		"nun_active_sharders",
 		"num_allocations",
 		"num_blobbers_per_Allocation",
 		"num_blobbers",
@@ -185,7 +184,6 @@ func (w SimulatorParameter) String() string {
 		"num_sharder_delegates",
 		"num_vesting_destinations_client",
 		"num_write_redeem_allocation",
-		"num_challenges_blobber",
 	}[w]
 }
 
@@ -208,7 +206,6 @@ var (
 	NumSharderDelegates          = Simulation + SimulationNumSharderDelegates.String()
 	NumVestingDestinationsClient = Simulation + SimulationNumVestingDestinationsClient.String()
 	NumWriteRedeemAllocation     = Simulation + SimulationNumWriteRedeemAllocation.String()
-	NumChallengesBlobber         = Simulation + SimulationNumChallengesBlobber.String()
 )
 
 type BenchTestI interface {

@@ -613,11 +613,9 @@ func Test_flow_reward(t *testing.T) {
 		alloc, err = ssc.getAllocation(allocID, balances)
 		require.NoError(t, err)
 
-		// todo load validators
-		//var validators *ValidatorNodes
-		//validators, err = ssc.getValidatorsList(balances)
-		//require.NoError(t, err)
-		var validators []*ValidationNodeSC
+		// load validators
+		validators, err := getValidatorsList(balances)
+		require.NoError(t, err)
 
 		// load blobber
 		var blobber *StorageNode
@@ -817,10 +815,8 @@ func Test_flow_penalty(t *testing.T) {
 		require.NoError(t, err)
 
 		// load validators
-		//var validators *ValidatorNodes
-		//validators, err = ssc.getValidatorsList(balances)
-		//require.NoError(t, err)
-		var validators []*ValidationNodeSC
+		validators, err := getValidatorsList(balances)
+		require.NoError(t, err)
 
 		// load blobber
 		var blobber *StorageNode
@@ -1047,11 +1043,9 @@ func Test_flow_no_challenge_responses_finalize(t *testing.T) {
 		alloc, err = ssc.getAllocation(allocID, balances)
 		require.NoError(t, err)
 
-		// todo load validators
-		//var validators *ValidatorNodes
-		//validators, err = ssc.getValidatorsList(balances)
-		//require.NoError(t, err)
-		var validators []*ValidationNodeSC
+		// load validators
+		validators, err := getValidatorsList(balances)
+		require.NoError(t, err)
 
 		// ---------------
 
@@ -1281,11 +1275,9 @@ func Test_flow_no_challenge_responses_cancel(t *testing.T) {
 		alloc, err = ssc.getAllocation(allocID, balances)
 		require.NoError(t, err)
 
-		// todo load validators
-		//var validators *ValidatorNodes
-		//validators, err = ssc.getValidatorsList(balances)
-		//require.NoError(t, err)
-		var validators []*ValidationNodeSC
+		// load validators
+		validators, err := getValidatorsList(balances)
+		require.NoError(t, err)
 
 		// ---------------
 
