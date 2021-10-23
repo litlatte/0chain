@@ -31,6 +31,7 @@ services:
       POSTGRES_HOST_AUTH_METHOD: trust
     volumes:
       - ../miner${MINER}/data/postgresql:/var/lib/postgresql/data
+      - ../sql_script/00-create-user.sql:/docker-entrypoint-initdb.d/00-create-user.sql
     networks:
       default:
   postgres-post:
@@ -39,10 +40,12 @@ services:
       POSTGRES_PORT: 5432
       POSTGRES_HOST: postgres
       POSTGRES_USER: postgres
+      POSTGRES_HOST_AUTH_METHOD: trust
     volumes:
       - ../bin:/0chain/bin
       - ../sql:/0chain/sql
-    command: bash /0chain/bin/postgres-entrypoint.sh
+      - ../sql_script/00-create-user.sql:/docker-entrypoint-initdb.d/00-create-user.sql
+    #command: bash /0chain/config/stats_db/postgres-entrypoint.sh
     links:
       - postgres:postgres
 

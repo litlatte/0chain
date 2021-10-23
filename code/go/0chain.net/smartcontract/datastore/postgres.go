@@ -3,6 +3,7 @@ package datastore
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -13,6 +14,7 @@ type postgresStore struct {
 }
 
 func (store *postgresStore) Open(config DbAccess) error {
+	time.Sleep(time.Second * 10)
 	if !config.Enabled {
 		return errors.New("db_open_error, db disabled")
 	}

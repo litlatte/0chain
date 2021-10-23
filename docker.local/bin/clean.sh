@@ -14,7 +14,7 @@ do
   rm -rf docker.local/miner"$i"/data/rocksdb/mb*
   rm -rf docker.local/miner"$i"/data/rocksdb/state*
   echo deleting miner$i postgresql
-  rm -rf docker.local/miner"$i"/data/postgresq/*
+  rm -rf docker.local/miner"$i"/data/postgresql/*
 done
 
 for i in $(seq 1 4)

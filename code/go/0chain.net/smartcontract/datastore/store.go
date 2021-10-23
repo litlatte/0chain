@@ -1,6 +1,7 @@
 package datastore
 
 import (
+	"fmt"
 	"time"
 
 	"gorm.io/gorm"
@@ -28,6 +29,7 @@ type Store interface {
 }
 
 func SetupDatabase(config DbAccess) error {
+	fmt.Println("piers show config", config)
 	//return nil
 	if Db != nil {
 		Db.Close()

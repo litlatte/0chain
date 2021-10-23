@@ -70,10 +70,6 @@ func main() {
 	initEntities()
 	serverChain := chain.NewChainFromConfig()
 	signatureScheme := serverChain.GetSignatureScheme()
-	err := setupStatsDb(serverChain.Config.SmartContractStatsDb)
-	if err != nil {
-		logging.Logger.Panic("Error starting sc stats database: " + err.Error())
-	}
 
 	logging.Logger.Info("Owner keys file", zap.String("filename", *keysFile))
 	reader, err := os.Open(*keysFile)
@@ -266,6 +262,11 @@ func main() {
 	}
 
 	initHandlers()
+
+	err = setupStatsDb(serverChain.Config.SmartContractStatsDb)
+	if err != nil {
+		logging.Logger.Panic("Error starting sc stats database: " + err.Error())
+	}
 
 	go func() {
 		logging.Logger.Info("Ready to listen to the requests")

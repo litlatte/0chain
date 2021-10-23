@@ -5,7 +5,7 @@ do
   mkdir -p docker.local/miner"$i"/data/redis/state
   mkdir -p docker.local/miner"$i"/data/redis/transactions
   mkdir -p docker.local/miner"$i"/data/rocksdb
-  mkdir -p docker.local/miner"$i"/data/postgresq
+  mkdir -p docker.local/miner"$i"/data/postgresql
   mkdir -p docker.local/miner"$i"/log
 done
 
