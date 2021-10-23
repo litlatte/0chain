@@ -11,27 +11,6 @@ type BlobberChallengeId struct {
 	BlobberID string
 }
 
-func (sc *StorageChallenge) addToStatsDb(blobberId string) error {
-	Db := datastore.Db.Get()
-
-	bc := BlobberChallengeId{}
-	if err := bc.getOrCreate(blobberId); err != nil {
-		return err
-	}
-
-	sc.BlobberChallengesId = bc.ID
-	Db.Create(sc)
-
-	return nil
-}
-
-func removeStorageChallenge(challengeId string) error {
-	Db := datastore.Db.Get()
-
-	result := Db.Delete(&StorageChallenge{}, "challenge_id", challengeId)
-	return result.Error
-}
-
 func (bci *BlobberChallengeId) getOrCreate(blobberId string) error {
 	Db := datastore.Db.Get()
 
@@ -52,6 +31,27 @@ func (bci *BlobberChallengeId) getOrCreate(blobberId string) error {
 		}
 	}
 	return nil
+}
+
+func (sc *StorageChallenge) addToStatsDb(blobberId string) error {
+	Db := datastore.Db.Get()
+
+	bc := BlobberChallengeId{}
+	if err := bc.getOrCreate(blobberId); err != nil {
+		return err
+	}
+
+	sc.BlobberChallengesId = bc.ID
+	Db.Create(sc)
+
+	return nil
+}
+
+func removeStorageChallenge(challengeId string) error {
+	Db := datastore.Db.Get()
+
+	result := Db.Delete(&StorageChallenge{}, "challenge_id", challengeId)
+	return result.Error
 }
 
 func (bc *BlobberChallenge) addToStatsDb() error {
