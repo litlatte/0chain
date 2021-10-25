@@ -79,7 +79,7 @@ func BenchmarkTests(
 					ClientID:        data.Clients[0],
 					ClientPublicKey: data.PublicKeys[0],
 					BlobberID:       GetMockBlobberId(0),
-					AllocationID:    getMockAllocationId(0),
+					AllocationID:    GetMockAllocationId(0),
 					OwnerID:         data.Clients[0],
 					Timestamp:       now,
 					ReadCounter:     viper.GetInt64(bk.NumWriteRedeemAllocation) + 1,
@@ -104,7 +104,7 @@ func BenchmarkTests(
 				wm := WriteMarker{
 					AllocationRoot:         encryption.Hash("allocation root"),
 					PreviousAllocationRoot: encryption.Hash("allocation root"),
-					AllocationID:           getMockAllocationId(0),
+					AllocationID:           GetMockAllocationId(0),
 					Size:                   1024,
 					BlobberID:              GetMockBlobberId(0),
 					Timestamp:              1,
@@ -226,7 +226,7 @@ func BenchmarkTests(
 			},
 			input: func() []byte {
 				bytes, _ := json.Marshal(&updateAllocationRequest{
-					ID:           getMockAllocationId(0),
+					ID:           GetMockAllocationId(0),
 					OwnerID:      data.Clients[0],
 					Size:         10000000,
 					Expiration:   common.Timestamp(viper.GetDuration(bk.StorageMinAllocDuration).Seconds()),
@@ -248,7 +248,7 @@ func BenchmarkTests(
 			},
 			input: func() []byte {
 				bytes, _ := json.Marshal(&lockRequest{
-					AllocationID: getMockAllocationId(0),
+					AllocationID: GetMockAllocationId(0),
 				})
 				return bytes
 			}(),
@@ -266,7 +266,7 @@ func BenchmarkTests(
 			},
 			input: func() []byte {
 				bytes, _ := json.Marshal(&lockRequest{
-					AllocationID: getMockAllocationId(0),
+					AllocationID: GetMockAllocationId(0),
 				})
 				return bytes
 			}(),
@@ -371,7 +371,7 @@ func BenchmarkTests(
 					Signature:  signature,
 				})
 				bytes, _ := json.Marshal(&freeStorageUpgradeInput{
-					AllocationId: getMockAllocationId(0),
+					AllocationId: GetMockAllocationId(0),
 					Marker:       string(fsmBytes),
 				})
 				return bytes
@@ -467,7 +467,7 @@ func BenchmarkTests(
 			},
 			input: func() []byte {
 				bytes, _ := json.Marshal(&transferAllocationInput{
-					AllocationId:      getMockAllocationId(0),
+					AllocationId:      GetMockAllocationId(0),
 					NewOwnerId:        data.Clients[1],
 					NewOwnerPublicKey: data.PublicKeys[1],
 				})
@@ -483,7 +483,7 @@ func BenchmarkTests(
 			input: func() []byte {
 				bytes, _ := json.Marshal(&curatorInput{
 					CuratorId:    data.Clients[viper.GetInt(bk.NumCurators)],
-					AllocationId: getMockAllocationId(0),
+					AllocationId: GetMockAllocationId(0),
 				})
 				return bytes
 			}(),
@@ -497,7 +497,7 @@ func BenchmarkTests(
 			input: func() []byte {
 				bytes, _ := json.Marshal(&curatorInput{
 					CuratorId:    data.Clients[0],
-					AllocationId: getMockAllocationId(0),
+					AllocationId: GetMockAllocationId(0),
 				})
 				return bytes
 			}(),
@@ -523,7 +523,7 @@ func BenchmarkTests(
 			input: func() []byte {
 				bytes, _ := json.Marshal(&lockRequest{
 					Duration:     viper.GetDuration(bk.StorageReadPoolMinLockPeriod),
-					AllocationID: getMockAllocationId(0),
+					AllocationID: GetMockAllocationId(0),
 				})
 				return bytes
 			}(),
@@ -562,7 +562,7 @@ func BenchmarkTests(
 			input: func() []byte {
 				bytes, _ := json.Marshal(&lockRequest{
 					Duration:     viper.GetDuration(bk.StorageWritePoolMinLockPeriod),
-					AllocationID: getMockAllocationId(0),
+					AllocationID: GetMockAllocationId(0),
 				})
 				return bytes
 			}(),

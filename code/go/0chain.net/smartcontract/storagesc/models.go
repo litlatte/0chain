@@ -85,23 +85,19 @@ func (an *Allocations) GetHashBytes() []byte {
 	return encryption.RawHash(an.Encode())
 }
 
-type ValidationNode struct {
+type InputValidationNode struct {
 	ID                string            `json:"id"`
 	BaseURL           string            `json:"url"`
 	PublicKey         string            `json:"-"`
 	StakePoolSettings stakePoolSettings `json:"stake_pool_settings"`
 }
 
-func (sn *ValidationNode) GetKey(globalKey string) datastore.Key {
-	return datastore.Key(globalKey + "validator:" + sn.ID)
-}
-
-func (sn *ValidationNode) Encode() []byte {
+func (sn *InputValidationNode) Encode() []byte {
 	buff, _ := json.Marshal(sn)
 	return buff
 }
 
-func (sn *ValidationNode) Decode(input []byte) error {
+func (sn *InputValidationNode) Decode(input []byte) error {
 	err := json.Unmarshal(input, sn)
 	if err != nil {
 		return err
@@ -109,12 +105,28 @@ func (sn *ValidationNode) Decode(input []byte) error {
 	return nil
 }
 
-func (sn *ValidationNode) GetHash() string {
-	return util.ToHex(sn.GetHashBytes())
+type ValidationNode struct {
+	ID      string `json:"id"`
+	BaseURL string `json:"url"`
 }
 
-func (sn *ValidationNode) GetHashBytes() []byte {
-	return encryption.RawHash(sn.Encode())
+type ValidatorFlag struct{}
+
+func getValidatorKey(globalKey, id string) datastore.Key {
+	return datastore.Key(globalKey + "validator:" + id)
+}
+
+func (sn *ValidatorFlag) Encode() []byte {
+	buff, _ := json.Marshal(sn)
+	return buff
+}
+
+func (sn *ValidatorFlag) Decode(input []byte) error {
+	err := json.Unmarshal(input, sn)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 type ValidatorNodes struct {
@@ -473,22 +485,20 @@ type StorageAllocation struct {
 	// Tx keeps hash with which the allocation has created or updated.
 	Tx string `json:"tx"`
 
-	DataShards        int                           `json:"data_shards"`
-	ParityShards      int                           `json:"parity_shards"`
-	Size              int64                         `json:"size"`
-	Expiration        common.Timestamp              `json:"expiration_date"`
-	Blobbers          []*StorageNode                `json:"blobbers"`
-	Owner             string                        `json:"owner_id"`
-	OwnerPublicKey    string                        `json:"owner_public_key"`
-	Stats             *StorageAllocationStats       `json:"stats"`
-	DiverseBlobbers   bool                          `json:"diverse_blobbers"`
-	PreferredBlobbers []string                      `json:"preferred_blobbers"`
-	BlobberDetails    []*BlobberAllocation          `json:"blobber_details"`
-	BlobberMap        map[string]*BlobberAllocation `json:"-"`
-	IsImmutable       bool                          `json:"is_immutable"`
-
-	// this is needed by cancel allocation to calculate pass rates
-	OpenChallenges []common.Timestamp `json:"open_challenges"`
+	DataShards              int                           `json:"data_shards"`
+	ParityShards            int                           `json:"parity_shards"`
+	Size                    int64                         `json:"size"`
+	Expiration              common.Timestamp              `json:"expiration_date"`
+	Blobbers                []*StorageNode                `json:"blobbers"`
+	Owner                   string                        `json:"owner_id"`
+	OwnerPublicKey          string                        `json:"owner_public_key"`
+	Stats                   *StorageAllocationStats       `json:"stats"`
+	DiverseBlobbers         bool                          `json:"diverse_blobbers"`
+	PreferredBlobbers       []string                      `json:"preferred_blobbers"`
+	BlobberDetails          []*BlobberAllocation          `json:"blobber_details"`
+	BlobberMap              map[string]*BlobberAllocation `json:"-"`
+	IsImmutable             bool                          `json:"is_immutable"`
+	AllAllocationsPartition int                           `json:"all_allocations_partition"`
 
 	// Requested ranges.
 	ReadPriceRange             PriceRange    `json:"read_price_range"`

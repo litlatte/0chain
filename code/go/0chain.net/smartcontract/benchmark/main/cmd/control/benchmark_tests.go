@@ -3,6 +3,7 @@ package control
 import (
 	"fmt"
 	"strconv"
+	"sync"
 	"testing"
 
 	"0chain.net/smartcontract/storagesc"
@@ -70,6 +71,14 @@ func BenchmarkTests(
 			name:     "control.blobber_challenges." + strconv.Itoa(viper.GetInt(bk.StorageMaxChallengesPerGeneration)),
 			endpoint: blobberChallenges,
 		},
+		{
+			name:     "control.allocationChallenges." + strconv.Itoa(viper.GetInt(bk.StorageMaxChallengesPerGeneration)),
+			endpoint: allocationChallenges,
+		},
+		{
+			name:     "control.allocationChallengesGoRoutine." + strconv.Itoa(viper.GetInt(bk.StorageMaxChallengesPerGeneration)),
+			endpoint: allocationChallengesGoRoutine,
+		},
 	}
 	var testsI []bk.BenchTestI
 	for _, test := range tests {
@@ -79,6 +88,41 @@ func BenchmarkTests(
 		Source:     bk.Storage,
 		Benchmarks: testsI,
 	}
+}
+
+func allocationChallenges(balances cstate.StateContextI) error {
+	for i := 0; i < viper.GetInt(bk.StorageMaxChallengesPerGeneration); i++ {
+		ac, err := storagesc.GetAllocationChallenges(storagesc.GetMockAllocationId(i), balances)
+		if err != nil {
+			panic(err)
+		}
+		_, err = balances.InsertTrieNode(storagesc.GetAllocationChallengeKey(ac.AllocationId), ac)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func allocationChallengesGoRoutine(balances cstate.StateContextI) error {
+	var wg sync.WaitGroup
+	for i := 0; i < viper.GetInt(bk.StorageMaxChallengesPerGeneration); i++ {
+		wg.Add(1)
+		go func(i int, wg *sync.WaitGroup) {
+			defer wg.Done()
+			ac, err := storagesc.GetAllocationChallenges(storagesc.GetMockAllocationId(i), balances)
+			if err != nil {
+				panic(err)
+			}
+			_, err = balances.InsertTrieNode(storagesc.GetAllocationChallengeKey(ac.AllocationId), ac)
+			if err != nil {
+				return
+			}
+		}(i, &wg)
+
+	}
+	wg.Wait()
+	return nil
 }
 
 func blobberChallenges(balances cstate.StateContextI) error {

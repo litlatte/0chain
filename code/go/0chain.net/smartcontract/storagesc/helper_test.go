@@ -387,11 +387,11 @@ func genChall(t testing.TB, ssc *StorageSmartContract,
 	}
 	var storChall = new(StorageChallenge)
 	storChall.Created = common.Timestamp(now)
-	storChall.ID = challID
+	storChall.ChallengeID = challID
 	storChall.PrevID = prevID
 	valSlice, err := valids.GetRandomSlice(rand.New(rand.NewSource(seed)), balances)
 	for _, val := range valSlice {
-		storChall.Validators = append(storChall.Validators, &ValidationNode{
+		storChall.Validators = append(storChall.Validators, &ValidationNodeSC{
 			ID:      val.Name(),
 			BaseURL: val.Data(),
 		})

@@ -39,7 +39,7 @@ func AddMockAllocations(
 	for i := 0; i < viper.GetInt(sc.NumAllocations); i++ {
 		cIndex := getMockClientFromAllocationIndex(i, len(clients))
 		sa := addMockAllocation(
-			i, cIndex, cas, publicKeys[cIndex], clients, sps, blobbers, challanges, validators,
+			i, cIndex, cas, publicKeys[cIndex], clients, sps, blobbers, challanges, validators, balances,
 		)
 		_, err := balances.InsertTrieNode(sa.GetKey(sscId), sa)
 		if err != nil {
@@ -156,6 +156,7 @@ func addMockAllocation(
 	blobbers []*StorageNode,
 	challanges []BlobberChallenge,
 	validators []*ValidationNode,
+	balances cstate.StateContextI,
 ) *StorageAllocation {
 	const mockMinLockDemand = 1
 	var (
@@ -163,7 +164,7 @@ func addMockAllocation(
 		expire = common.Timestamp(viper.GetDuration(sc.StorageMinAllocDuration).Seconds()) + common.Now()
 		lock   = state.Balance(float64(getMockBlobberTerms().WritePrice) *
 			sizeInGB(viper.GetInt64(sc.StorageMinAllocSize)))
-		id = getMockAllocationId(i)
+		id = GetMockAllocationId(i)
 	)
 
 	sa := &StorageAllocation{
@@ -204,6 +205,11 @@ func addMockAllocation(
 	cas[cIndex].Allocations.List.add(sa.ID)
 	numAllocBlobbers := sa.DataShards + sa.ParityShards
 	startBlobbers := getMockBlobberBlockFromAllocationIndex(i)
+	ac := AllocationChallenges{
+		AllocationId: id,
+		DataShards:   viper.GetInt(sc.NumBlobbersPerAllocation) / 2,
+		Expiration:   expire,
+	}
 	for j := 0; j < numAllocBlobbers; j++ {
 		bIndex := startBlobbers + j
 		bId := GetMockBlobberId(bIndex)
@@ -230,17 +236,33 @@ func addMockAllocation(
 			PublicKey:         "",
 			StakePoolSettings: getMockStakePoolSettings(bId),
 		})
+		abc := ABChallenges{
+			BlobberId:               bId,
+			AllocationRoot:          "mock allocation root",
+			FailedChallenges:        10,
+			SuccessChallenges:       100,
+			ChallengeCompletionTime: common.Timestamp(viper.GetDuration(sc.StorageMaxChallengeCompletionTime) * time.Second),
+		}
+		for i := 0; i < 100; i++ {
+			abc.Created = append(abc.Created, common.Timestamp(100*i))
+		}
+		ac.Blobbers = append(ac.Blobbers, &abc)
+		// todo remove setupMockChallenges
 		setupMockChallenges(
-			getMockAllocationId(i),
+			GetMockAllocationId(i),
 			bIndex,
 			blobbers[bIndex],
 			&challanges[bIndex],
 			validators,
 		)
 	}
+	if err := ac.save(balances); err != nil {
+		panic(err)
+	}
 	return sa
 }
 
+// todo remove this
 func setupMockChallenges(
 	allocationId string,
 	bIndex int,
@@ -248,12 +270,22 @@ func setupMockChallenges(
 	bc *BlobberChallenge,
 	validators []*ValidationNode,
 ) {
+	const mockAllocationRoot = "mock allocation root"
+
 	bc.BlobberID = blobber.ID //d46458063f43eb4aeb4adf1946d123908ef63143858abb24376d42b5761bf577
 	var selValidators = validators[:viper.GetInt(sc.NumBlobbersPerAllocation)/2]
+	var scValidators []*ValidationNodeSC
+	for _, val := range selValidators {
+		scValidators = append(scValidators, &ValidationNodeSC{
+			ID:      val.ID,
+			BaseURL: val.BaseURL,
+		})
+	}
+
 	for i := 0; i < viper.GetInt(sc.StorageMaxChallengesPerGeneration); i++ {
 		bc.addChallenge(&StorageChallenge{
-			ID:         getMockChallengeId(bIndex, i),
-			Validators: selValidators,
+			ChallengeID: getMockChallengeId(bIndex, i),
+			Validators:  scValidators,
 			//Blobber:      blobber,
 			AllocationID: allocationId,
 		})
@@ -499,7 +531,7 @@ func AddMockWriteRedeems(
 				ClientID:        clients[client],
 				ClientPublicKey: publicKeys[client],
 				BlobberID:       GetMockBlobberId(getMockBlobberBlockFromAllocationIndex(i)),
-				AllocationID:    getMockAllocationId(i),
+				AllocationID:    GetMockAllocationId(i),
 				OwnerID:         clients[client],
 				ReadCounter:     viper.GetInt64(sc.NumWriteRedeemAllocation),
 				PayerID:         clients[client],
@@ -559,7 +591,7 @@ func getMockValidatorId(index int) string {
 	return encryption.Hash("mockValidator_" + strconv.Itoa(index))
 }
 
-func getMockAllocationId(allocation int) string {
+func GetMockAllocationId(allocation int) string {
 	//return "mock allocation id " + strconv.Itoa(allocation)
 	return encryption.Hash("mock allocation id" + strconv.Itoa(allocation))
 }

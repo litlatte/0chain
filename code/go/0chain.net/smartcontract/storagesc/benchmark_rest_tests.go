@@ -79,7 +79,7 @@ func BenchmarkRestTests(
 			endpoint: ssc.AllocationStatsHandler,
 			params: func() url.Values {
 				var values url.Values = make(map[string][]string)
-				values.Set("allocation", getMockAllocationId(0))
+				values.Set("allocation", GetMockAllocationId(0))
 				return values
 			}(),
 		},
@@ -162,7 +162,7 @@ func BenchmarkRestTests(
 			params: func() url.Values {
 				var values url.Values = make(map[string][]string)
 				values.Set("client_id", data.Clients[0])
-				values.Set("allocation_id", getMockAllocationId(0))
+				values.Set("allocation_id", GetMockAllocationId(0))
 				values.Set("blobber_id", GetMockBlobberId(0))
 				return values
 			}(),
@@ -182,7 +182,7 @@ func BenchmarkRestTests(
 			params: func() url.Values {
 				var values url.Values = make(map[string][]string)
 				values.Set("client_id", data.Clients[0])
-				values.Set("allocation_id", getMockAllocationId(0))
+				values.Set("allocation_id", GetMockAllocationId(0))
 				values.Set("blobber_id", GetMockBlobberId(0))
 				return values
 			}(),
@@ -210,7 +210,7 @@ func BenchmarkRestTests(
 			endpoint: ssc.getChallengePoolStatHandler,
 			params: func() url.Values {
 				var values url.Values = make(map[string][]string)
-				values.Set("allocation_id", getMockAllocationId(0))
+				values.Set("allocation_id", GetMockAllocationId(0))
 				return values
 			}(),
 		},
