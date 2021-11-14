@@ -43,6 +43,7 @@ func main() {
 	delayFile := flag.String("delay_file", "", "delay_file")
 	magicBlockFile := flag.String("magic_block_file", "", "magic_block_file")
 	initialStatesFile := flag.String("initial_states", "", "initial_states")
+	configureIntegrationsTestsFlags()
 	flag.Parse()
 	config.Configuration.DeploymentMode = byte(*deploymentMode)
 	config.SetupDefaultConfig()
@@ -409,7 +410,9 @@ func initN2NHandlers() {
 	miner.SetupM2SRequestors()
 	miner.SetupM2MRequestors()
 
-	miner.SetupX2MResponders()
+	if applyAdversarialMode() != "vrfs_spam" {
+		miner.SetupX2MResponders()
+	}
 	chain.SetupX2XResponders()
 	chain.SetupX2MRequestors()
 	chain.SetupX2SRequestors()
