@@ -1,0 +1,23 @@
+enable:
+  - "attack round transfer"
+
+sets:
+  - name: "attack round transfer"
+    tests:
+      - "check make progress for time out leader"
+
+tests:
+  - name: "check make progress for time out leader"
+    flow:
+      - set_monitor: "sharder-1"
+      - cleanup_bc: { }
+      - start: ["sharder-1"]
+#      - start_lock: ["miner-3"] ## lock Leader_0
+#      - start: [ "miner-1", "miner-2", "miner-4" ]
+      - start: [ "miner-1", "miner-2", "miner-3", "miner-4" ]
+      - wait_round:
+          round: 5
+      - check_block:
+          sharder_address: "http://localhost:7171"
+          miner_rank_expected: 0
+

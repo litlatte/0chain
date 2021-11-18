@@ -53,7 +53,7 @@ func (n *Node) Start(logsDir string, env map[string]string) (err error) {
 	}
 
 	logsDir = filepath.Join(logsDir, string(n.Name))
-	if err = os.MkdirAll(logsDir, 0755); err != nil {
+	if err = os.MkdirAll(logsDir, 0777); err != nil {
 		return fmt.Errorf("creating logs directory %s: %v", logsDir, err)
 	}
 

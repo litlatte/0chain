@@ -7,6 +7,8 @@ do
     docker stop "$running"
 done
 
+export PATH=$PATH:/opt/go/bin
+
 # go caches all build by default
 (cd ./code/go/0chain.net/conductor/conductor/ && go build)
 # start the conductor

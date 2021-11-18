@@ -58,6 +58,8 @@ func init() {
 		return expectActiveSet(ex, val)
 	})
 
+	register(checkBlockDirectiveKey, checkBlock)
+
 	// wait for an event of the monitor
 
 	register("wait_view_change", func(name string,
