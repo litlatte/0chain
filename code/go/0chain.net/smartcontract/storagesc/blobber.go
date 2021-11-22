@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"sort"
 
 	cstate "0chain.net/chaincore/chain/state"
 	"0chain.net/chaincore/state"
@@ -285,6 +286,12 @@ func (sc *StorageSmartContract) updateBlobberSettings(t *transaction.Transaction
 func filterHealthyBlobbers(now common.Timestamp) filterBlobberFunc {
 	return filterBlobberFunc(func(b *StorageNode) (kick bool) {
 		return b.LastHealthCheck <= (now - blobberHealthTime)
+	})
+}
+
+func filterSelectedBlobbers(urls []string) filterBlobberFunc {
+	return filterBlobberFunc(func(b *StorageNode) (kick bool) {
+		return sort.SearchStrings(urls, b.BaseURL) >= 0
 	})
 }
 
