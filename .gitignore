@@ -64,3 +64,4 @@ docker.local/log_dumps
 !**/mocks/.gitkeep
 
 burn_error.txt
+/tmp
