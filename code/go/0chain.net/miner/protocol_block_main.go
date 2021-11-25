@@ -1,3 +1,4 @@
+//go:build !integration_tests
 // +build !integration_tests
 
 package miner
@@ -297,4 +298,9 @@ func (mc *Chain) GenerateBlock(ctx context.Context, b *block.Block,
 	bsHistogram.Update(int64(len(b.Txns)))
 	node.Self.Underlying().Info.AvgBlockTxns = int(math.Round(bsHistogram.Mean()))
 	return nil
+}
+
+/*UpdateFinalizedBlock - update the latest finalized block */
+func (mc *Chain) UpdateFinalizedBlock(ctx context.Context, b *block.Block) {
+	mc.updateFinalizedBlock(ctx, b)
 }

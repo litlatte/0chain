@@ -1,11 +1,15 @@
+//go:build integration_tests
 // +build integration_tests
 
 package miner
 
 import (
 	"context"
+	"encoding/gob"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"math"
 	"math/rand"
 	"time"
@@ -20,6 +24,7 @@ import (
 	"0chain.net/core/datastore"
 	"0chain.net/core/logging"
 	"0chain.net/core/util"
+	"github.com/rcrowley/go-metrics"
 	"go.uber.org/zap"
 
 	crpc "0chain.net/conductor/conductrpc"
@@ -321,4 +326,38 @@ func (mc *Chain) GenerateBlock(ctx context.Context, b *block.Block,
 	bsHistogram.Update(int64(len(b.Txns)))
 	node.Self.Underlying().Info.AvgBlockTxns = int(math.Round(bsHistogram.Mean()))
 	return nil
+}
+
+/*UpdateFinalizedBlock - update the latest finalized block */
+func (mc *Chain) UpdateFinalizedBlock(ctx context.Context, b *block.Block) {
+	r := mc.GetRound(b.Round)
+	blocks := crpc.Blocks{Round: r.GetRoundNumber()}
+	var err error
+	blocks.Proposed, err = json.Marshal(r.GetProposedBlocks())
+	if err != nil {
+		log.Printf("Conductor: error while marshalling proposed blocks: %v", err)
+	}
+	blocks.Notarised, err = json.Marshal(r.GetNotarizedBlocks())
+	if err != nil {
+		log.Printf("Conductor: error while marshalling proposed blocks: %v", err)
+	}
+
+	if err := crpc.Client().StoreProposedAndNotarisedBlocks(blocks); err != nil {
+		log.Printf("Confuctor: storing round failed, err %v,\nround %#v", err, blocks.Round)
+	}
+
+	mc.updateFinalizedBlock(ctx, b)
+}
+
+func registerGobTypes() {
+	gob.Register(util.MerklePatriciaTrie{})
+	gob.Register(util.ChangeCollector{})
+	gob.Register(util.LeafNode{})
+	gob.Register(util.FullNode{})
+	gob.Register(util.ExtensionNode{})
+	gob.Register(util.ValueNode{})
+	gob.Register(util.SecureSerializableValue{})
+	gob.Register(util.OriginTracker{})
+	gob.Register(metrics.StandardTimer{})
+	gob.Register([]*block.Block{})
 }

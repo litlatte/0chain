@@ -114,35 +114,6 @@ func startStatusMonitor(mb *block.MagicBlock, ctx context.Context) func() {
 	}
 }
 
-/*FinalizeRoundWorker - a worker that handles the finalized blocks */
-func (c *Chain) FinalizeRoundWorker(ctx context.Context) {
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		case r := <-c.finalizedRoundsChannel:
-			func() {
-				// TODO: make the timeout configurable
-				cctx, cancel := context.WithTimeout(ctx, 5*time.Second)
-				defer cancel()
-				doneC := make(chan struct{})
-				go func() {
-					defer close(doneC)
-					c.finalizeRound(cctx, r)
-					c.UpdateRoundInfo(r)
-				}()
-
-				select {
-				case <-cctx.Done():
-					Logger.Warn("FinalizeRoundWorker finalize round timeout",
-						zap.Int64("round", r.GetRoundNumber()))
-				case <-doneC:
-				}
-			}()
-		}
-	}
-}
-
 // MagicBlockBrief represents base info of magic block
 type MagicBlockBrief struct {
 	MagicBlockNumber int64

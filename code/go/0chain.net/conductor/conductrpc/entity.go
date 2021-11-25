@@ -169,6 +169,13 @@ func (e *Entity) ShareOrSignsShares(sosse *ShareOrSignsSharesEvent) (
 	return e.client.shareOrSignsShares(sosse)
 }
 
+func (e *Entity) StoreProposedAndNotarisedBlocks(blocks Blocks) error {
+	if !e.isMonitor() {
+		return nil
+	}
+	return e.client.storeProposedAndNotarisedBlocks(blocks)
+}
+
 //
 // global
 //

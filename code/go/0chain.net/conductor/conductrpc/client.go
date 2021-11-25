@@ -155,3 +155,14 @@ func (c *client) state(me NodeID) (state *State, err error) {
 	}
 	return
 }
+
+func (c *client) storeProposedAndNotarisedBlocks(blocks Blocks) (err error) {
+	err = c.client.Call("Server.StoreProposedAndNotarisedBlocks", blocks, struct{}{})
+	if err == rpc.ErrShutdown {
+		if err = c.dial(); err != nil {
+			return
+		}
+		err = c.client.Call("Server.StoreProposedAndNotarisedBlocks", blocks, &struct{}{})
+	}
+	return
+}

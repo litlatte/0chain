@@ -1,12 +1,14 @@
 package conductrpc
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net"
 	"net/rpc"
 	"sync"
 
+	"0chain.net/chaincore/block"
 	"0chain.net/conductor/config"
 )
 
@@ -121,6 +123,9 @@ type Server struct {
 	// node id -> node name mapping
 	names map[NodeID]NodeName
 
+	proposedBlocks  map[int64][]*block.Block
+	notarisedBlocks map[int64][]*block.Block
+
 	quitOnce sync.Once
 	quit     chan struct{}
 }
@@ -148,6 +153,8 @@ func NewServer(address string, names map[NodeID]NodeName) (s *Server,
 
 	s.nodes = make(map[NodeName]*nodeState)
 	s.server = rpc.NewServer()
+	s.proposedBlocks = make(map[int64][]*block.Block)
+	s.notarisedBlocks = make(map[int64][]*block.Block)
 	if err = s.server.Register(s); err != nil {
 		return nil, err
 	}
@@ -409,6 +416,20 @@ func (s *Server) State(id NodeID, state *State) (err error) {
 		return ErrShutdown
 	}
 	return
+}
+
+func (s *Server) StoreProposedAndNotarisedBlocks(blocks *Blocks, _ *struct{}) error {
+	proposed, notarised := make([]*block.Block, 0), make([]*block.Block, 0)
+	if err := json.Unmarshal(blocks.Proposed, &proposed); err != nil {
+		return err
+	}
+	if err := json.Unmarshal(blocks.Notarised, &notarised); err != nil {
+		return err
+	}
+
+	s.proposedBlocks[blocks.Round] = proposed
+	s.notarisedBlocks[blocks.Round] = notarised
+	return nil
 }
 
 //
